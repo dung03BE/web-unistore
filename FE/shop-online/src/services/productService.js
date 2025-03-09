@@ -1,10 +1,23 @@
 import { del, get, path, post } from "../utils/request";
 
-export const getProductList = async (page = 0, size = 10) => {
-    const result = await get(`products?page=${page}&size=${size}`);
-    return result.result;
-}
+export const getProductList = async (page = 0, size = 8, minPrice, maxPrice, search) => {
+    let url = `products?page=${page}&size=${size}`;
 
+    if (minPrice !== undefined && minPrice !== null) {
+        url += `&minPrice=${minPrice}`;
+    }
+
+    if (maxPrice !== undefined && maxPrice !== null) {
+        url += `&maxPrice=${maxPrice}`;
+    }
+
+    if (search && search.trim() !== "") {
+        url += `&search=${encodeURIComponent(search)}`;
+    }
+
+    const result = await get(url);
+    return result.result;
+};
 
 export const getProductById = async (id) => {
     const result = await get(`products/${id}`); // API để lấy chi tiết sản phẩm theo ID

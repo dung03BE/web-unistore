@@ -135,6 +135,30 @@
     gap: 10px; /* Khoảng cách giữa các nút */
     align-items: center;
     margin-bottom: 10px;
+    .searchPrice{
+       
+        display: flex;
+        gap: 8px; // Khoảng cách giữa hai input
+
+        input[type="number"] {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            width: 150px; // Đặt chiều rộng cố định cho input
+            box-sizing: border-box; // Đảm bảo padding và border không ảnh hưởng đến chiều rộng
+
+            &:focus {
+                outline: none;
+                border-color: #007bff; // Màu viền khi input được focus
+                box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); // Hiệu ứng shadow khi focus
+            }
+
+            &::placeholder {
+                color: #aaa; // Màu placeholder
+            }
+        }
+    }
 }
 
 .filter-button {

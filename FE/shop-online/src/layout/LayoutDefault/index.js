@@ -18,9 +18,7 @@ import { setUserDetails as setUserDetailsAction } from '../../actions/user.js'; 
 import { useDispatch } from "react-redux";
 
 
-const handleSearch = (e) => {
-    e.preventDefault();
-};
+
 
 const handleOpenLocation = () => {
     // OpenLocation implementation
@@ -33,6 +31,7 @@ function LayoutDefault() {
     const dropdownRef = useRef(null);
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const [searchQuery, setSearchQuery] = useState('');
     useEffect(() => {
         const accessToken = getToken();
 
@@ -101,7 +100,14 @@ function LayoutDefault() {
     if (isLoading) {
         return <div className="layout-loading">Đang tải...</div>;
     }
-
+    const handleSearch = (e) => {
+        e.preventDefault();
+        if (searchQuery.trim()) {
+            navigate(`/?search=${encodeURIComponent(searchQuery)}`);
+        } else {
+            navigate("/");
+        }
+    };
     return (
         <>
             <div className="layout-default">
@@ -129,6 +135,7 @@ function LayoutDefault() {
                             name="key"
                             autoComplete="off"
                             maxLength={100}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                         />
                         <button type="submit" aria-label="button suggest search">
                             <i className="icon-search"><FontAwesomeIcon icon={faMagnifyingGlass} /></i>
