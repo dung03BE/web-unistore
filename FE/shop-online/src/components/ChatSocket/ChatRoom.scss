@@ -1,0 +1,26 @@
+/* ChatRoom.scss */
+.chat-room {
+   
+    .messages {
+        .mb-2 {
+            .d-flex {
+                align-items: center; /* Thay đổi align-items thành center */
+            }
+            .mr-2 {
+                margin-right: 8px;
+            }
+            .small {
+                font-size: 0.8rem;
+            }
+            .font-weight-bold {
+                margin-top:20px;
+            }
+        }
+    }
+    form {
+        display: flex;
+        align-items: center;
+        gap: 10px; /* Điều chỉnh khoảng cách giữa input và button */
+        
+    }
+}
