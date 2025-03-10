@@ -2,6 +2,7 @@ import Login from "../components/Login";
 import Payment from "../components/Payment/Payment";
 import ProductDetails from "../components/product/ProductDetail ";
 import Profile from "../components/Profile/Profile";
+import Register from "../components/Profile/Register";
 import LayoutDefault from "../layout/LayoutDefault";
 import Cart from "../pages/Cart";
 import Home from "../pages/Home";
@@ -28,9 +29,13 @@ export const router = [
                 element: <ProductDetails />
             },
             {
-                path: "/profile", // Thêm định tuyến cho Login
+                path: "/profile", // Định nghĩa /profile ở cấp độ root
                 element: <Profile />
-            }
+            },
+            {
+                path: "/register", // Thêm định tuyến cho register
+                element: <Register />
+            },
         ]
     },
     {

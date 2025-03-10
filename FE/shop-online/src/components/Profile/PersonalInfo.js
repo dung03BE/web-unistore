@@ -1,8 +1,11 @@
-import { Avatar, Button, DatePicker, Input, Modal, Row, Col } from "antd";
+import { Avatar, Button, DatePicker, Input, Modal, Row, Col, message } from "antd";
 import "../Profile/PersonalInfo.scss";
 import { UserOutlined } from "@ant-design/icons";
 import { useState, useEffect } from "react"; // Import useEffect
 import dayjs from "dayjs";
+import { changePasswordApi, putUserApi } from "../../services/userService";
+import { useDispatch } from "react-redux";
+import { setUserDetails } from "../../actions/user";
 
 export const PersonalInfo = ({ userDetails }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -11,7 +14,11 @@ export const PersonalInfo = ({ userDetails }) => {
     const [phoneNumber, setPhoneNumber] = useState(userDetails?.phoneNumber || "");
     const [address, setAddress] = useState(userDetails?.address || "");
     const [email, setEmail] = useState(userDetails?.email || "");
-
+    const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
+    const [oldPassword, setOldPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [retypeNewPassword, setRetypeNewPassword] = useState("");
+    const dispatch = useDispatch();
     useEffect(() => {
         if (userDetails) {
             setFullName(userDetails.fullName || "");
@@ -29,14 +36,85 @@ export const PersonalInfo = ({ userDetails }) => {
     };
 
     const handleOk = () => {
-        // Xử lý logic cập nhật thông tin người dùng ở đây
+        handleUpdateUser();
         setIsModalOpen(false);
     };
 
     const handleCancel = () => {
         setIsModalOpen(false);
     };
+    const handleUpdateUser = async () => {
+        try {
+            const updatedUserData = {
+                fullname: fullName, // Thay đổi fullName thành full_name
+                phone_number: phoneNumber, // Thay đổi phoneNumber thành phone_number
+                address,
+                email,
+                date_of_birth: dob.toDate(),
+            };
 
+            const response = await putUserApi(updatedUserData);
+
+            if (response) {
+                dispatch(setUserDetails(response));
+                message.success("Cập nhật thông tin thành công!");
+            } else {
+                throw new Error("Không nhận được dữ liệu từ API");
+            }
+        } catch (error) {
+            console.error("Lỗi khi cập nhật:", error);
+            message.error("Cập nhật thông tin thất bại!");
+        }
+
+    };
+    // Hàm hiển thị Modal đổi mật khẩu
+    const showChangePasswordModal = () => {
+        setIsChangePasswordModalOpen(true);
+    };
+
+    // Hàm xử lý khi nhấn OK trong Modal đổi mật khẩu
+    const handleChangePasswordOk = () => {
+        // Xử lý logic đổi mật khẩu ở đây
+        handlePassword();
+        setIsChangePasswordModalOpen(false);
+    };
+
+    // Hàm xử lý khi nhấn Cancel trong Modal đổi mật khẩu
+    const handleChangePasswordCancel = () => {
+        setIsChangePasswordModalOpen(false);
+    };
+    const handlePassword = async () => {
+        try {
+            // Validate mật khẩu
+            if (newPassword !== retypeNewPassword) {
+                message.error("Mật khẩu mới và nhập lại mật khẩu không khớp!");
+                return;
+            }
+
+            const changePWUser = {
+                password: newPassword,
+                retype_password: retypeNewPassword,
+                old_password: oldPassword,
+            };
+
+            const response = await changePasswordApi(changePWUser);
+            console.log("rs:", response);
+            if (response.code !== 1000) {
+                message.error("Đổi mật khẩu thất bại");
+                return;
+            }
+
+            message.success("Đổi mật khẩu thành công");
+        } catch (error) {
+            console.log("Error from changePasswordApi:", error);
+            // Xử lý lỗi từ API
+            if (error.status === 400 && error.data) {
+                message.error("Mật khẩu cũ không đúng");
+            } else {
+                message.error("Đổi mật khẩu thất bại");
+            }
+        }
+    };
     return (
         <div className="personal">
             <Avatar size={64} icon={<UserOutlined />} />
@@ -50,6 +128,10 @@ export const PersonalInfo = ({ userDetails }) => {
                 <Button type="primary" danger onClick={showModal} >
                     Chỉnh sửa thông tin
                 </Button>
+                <Button type="primary" onClick={showChangePasswordModal} style={{ marginLeft: '10px' }}>
+                    Đổi mật khẩu
+                </Button>
+
                 <Modal
                     title={
                         <span style={{ fontSize: "27px" }}>
@@ -100,13 +182,36 @@ export const PersonalInfo = ({ userDetails }) => {
                                 style={{ width: "300px", height: "40px", fontSize: "16px" }}
                             />
                         </Col>
-                        <Col span={12}> {/* Cột phải */}
-                            <p>Mật khẩu:</p>
-                            <Input placeholder="" type="password"
-                                style={{ width: "300px", height: "40px", fontSize: "16px" }} />
-                            <p>Nhập lại mật khẩu:</p>
-                            <Input placeholder="" type="password"
-                                style={{ width: "300px", height: "40px", fontSize: "16px" }} />
+
+                    </Row>
+                </Modal>
+                <Modal
+                    title={
+                        <span style={{ fontSize: "27px" }}>
+                            Đổi mật khẩu:
+                        </span>
+                    }
+                    open={isChangePasswordModalOpen}
+                    onOk={handleChangePasswordOk}
+                    onCancel={handleChangePasswordCancel}
+                    width={600}
+                >
+                    <Row gutter={16}>
+                        <Col span={24}>
+                            <p>Mật khẩu cũ:</p>
+                            <Input.Password placeholder="Nhập mật khẩu cũ"
+                                style={{ width: "300px", height: "40px", fontSize: "16px" }} value={oldPassword}
+                                onChange={(e) => setOldPassword(e.target.value)} />
+                            <p>Mật khẩu mới:</p>
+                            <Input.Password placeholder="Nhập mật khẩu mới"
+                                style={{ width: "300px", height: "40px", fontSize: "16px" }} value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                            />
+                            <p>Nhập lại mật khẩu mới:</p>
+                            <Input.Password placeholder="Nhập lại mật khẩu mới"
+                                style={{ width: "300px", height: "40px", fontSize: "16px" }} value={retypeNewPassword}
+                                onChange={(e) => setRetypeNewPassword(e.target.value)}
+                            />
                         </Col>
                     </Row>
                 </Modal>
