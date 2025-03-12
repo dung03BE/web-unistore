@@ -20,6 +20,7 @@ public class UserResponse {
     String address;
     Date dateOfBirth;
     private int roleId;
+    private String email;
     public static UserResponse fromEntity(User user) {
         return new UserResponse(
                 user.getId(),
@@ -27,7 +28,8 @@ public class UserResponse {
                 user.getFullName(),
                 user.getAddress(),
                 user.getDateOfBirth(),
-                user.getRole().getId() // Tránh vòng lặp vô hạn khi serialize
+                user.getRole().getId(), // Tránh vòng lặp vô hạn khi serialize
+                user.getEmail()
         );
     }
 }

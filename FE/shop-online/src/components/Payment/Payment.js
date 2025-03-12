@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 
 function Payment() {
     const userDetails = useSelector((state) => state.userReducer.userDetails);
+
     const cart = useSelector((state) => state.cartReducer.cart);
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
@@ -96,7 +97,7 @@ function Payment() {
         0
     );
     const finalTotal = total - discount;
-
+    console.log("user:" + userDetails);
     return (
         <>
             <h2>Thông tin thanh toán</h2>

@@ -21,7 +21,8 @@ public enum ErrorCode {
     INVENTORY_ITEM_NOT_EXISTS(1011, "INVENTORY_ITEM not existed", HttpStatus.NOT_FOUND),
     ORDER_NOT_EXISTS(1012, "ORDER not existed", HttpStatus.NOT_FOUND),
     OutofStock(1013, "Out of Stock", HttpStatus.BAD_REQUEST),
-    PRODUCT_EXISTS_CART(1014,"Product exists in the cart",HttpStatus.BAD_REQUEST);
+    PRODUCT_EXISTS_CART(1014,"Product exists in the cart",HttpStatus.BAD_REQUEST),
+    EMAIL_EXISTED(1015, "Email existed", HttpStatus.BAD_REQUEST)
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

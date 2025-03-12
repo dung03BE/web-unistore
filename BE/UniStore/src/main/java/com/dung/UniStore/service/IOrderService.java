@@ -12,4 +12,6 @@ public interface IOrderService {
     OrderResponse createOrder(OrderCreationRequest request) throws Exception;
 
     OrderResponse checkout(OrderCreationRequest request) throws Exception;
+
+    List<OrderResponse> getOrderByUserId(int userId);
 }

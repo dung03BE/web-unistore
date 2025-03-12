@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@ant-design/plots": "^2.3.3",
+    "@fortawesome/free-brands-svg-icons": "^6.7.2",
+    "@fortawesome/free-solid-svg-icons": "^6.7.2",
+    "@fortawesome/react-fontawesome": "^0.2.2",
+    "@stomp/stompjs": "^7.0.1",
+    "sockjs-client": "^1.6.1"
+  }
+}

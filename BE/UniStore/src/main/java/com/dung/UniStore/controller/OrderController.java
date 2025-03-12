@@ -5,6 +5,7 @@ import com.dung.UniStore.dto.response.ApiResponse;
 import com.dung.UniStore.dto.response.OrderResponse;
 import com.dung.UniStore.form.OrderFilterForm;
 import com.dung.UniStore.service.IOrderService;
+import com.dung.UniStore.utils.AuthUtil;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderController {
     private final IOrderService orderService;
-
+    private final AuthUtil authUtil;
     @GetMapping
     public ApiResponse<List<OrderResponse>> getAllOrders(OrderFilterForm form) {
         return ApiResponse.<List<OrderResponse>>builder()
@@ -49,11 +50,15 @@ public class OrderController {
 //    public OrderDTO getOrderById(@PathVariable int id) throws DataNotFoundException {
 //        return modelMapper.map(orderService.getOrderById(id),OrderDTO.class);
 //    }
-//    @GetMapping("/user/{user_id}")
-//    public OrderDTO getOrderByUserId(@PathVariable("user_id") int userId) throws DataNotFoundException {
-//        Order orderByUserId = orderService.getOrderByUserId(userId);
-//        return modelMapper.map(orderByUserId,OrderDTO.class);
-//    }
+    @GetMapping("/user")
+    public ApiResponse<List<OrderResponse>> getOrderByUserId()  {
+        Long userId = authUtil.loggedInUserId();
+        List<OrderResponse> orders = orderService.getOrderByUserId(Math.toIntExact(userId));
+        return ApiResponse.<List<OrderResponse>>builder()
+                .result(orders) //
+                .build();
+    }
+
 
     @PostMapping("/checkout")
     public ApiResponse<OrderResponse> checkout(@RequestBody OrderCreationRequest request) throws Exception {

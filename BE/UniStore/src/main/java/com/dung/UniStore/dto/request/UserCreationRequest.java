@@ -24,6 +24,8 @@ public class UserCreationRequest {
     private String phoneNumber;
     private String address;
 
+    @JsonProperty("old_password")
+    private String oldPassword;
     private String password;
     @JsonProperty("retype_password")
     private String retypePassword;
@@ -37,4 +39,5 @@ public class UserCreationRequest {
     private int googleAccountId;
     @JsonProperty("role_id")
     private int roleId;
+    private String email;
 }

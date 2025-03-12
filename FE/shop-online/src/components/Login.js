@@ -22,6 +22,8 @@ import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { getToken, setToken } from "../services/localStorageService";
 import { message } from "antd";
+import { useDispatch } from "react-redux";
+import { setUserDetails } from "../actions/user";
 
 function Login() {
   const navigate = useNavigate();
@@ -31,7 +33,7 @@ function Login() {
   const [snackBarMessage, setSnackBarMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-
+  const dispatch = useDispatch();
   useEffect(() => {
     const accessToken = getToken();
     if (accessToken) {
@@ -60,44 +62,74 @@ function Login() {
     );
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
 
-    fetch("http://localhost:8081/api/v1/auth/login", {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        phoneNumber: phoneNumber,
-        password: password,
-      }),
-    })
-      .then((response) => {
-        return response.json();
-      })
-      .then((data) => {
-        console.log("Response body:", data);
-        if (!data.result.authenticated) {
-          message.error("Tài khoản hoặc mật khẩu không chính xác!");
-        }
-        if (data.code !== 1000) {
-          throw new Error(data.message);
-        }
-        message.success("Đăng nhập thành công");
-        setToken(data.result?.token);
-        navigate("/");
-
-      })
-      .catch((error) => {
-        setSnackBarMessage("Tài khoản hoặc mật khẩu không chính xác!");
-        setSnackBarOpen(true);
-      })
-      .finally(() => {
-        setLoading(false);
+    try {
+      const loginResponse = await fetch("http://localhost:8081/api/v1/auth/login", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          phoneNumber: phoneNumber,
+          password: password,
+        }),
       });
+
+      const loginData = await loginResponse.json();
+      console.log("Response body:", loginData);
+
+      if (!loginData.result.authenticated || loginData.code !== 1000) {
+        message.error("Tài khoản hoặc mật khẩu không chính xác!");
+        throw new Error(loginData.message || "Đăng nhập thất bại");
+      }
+
+      // Lưu token
+      const accessToken = loginData.result?.token;
+      setToken(accessToken);
+
+      // Lấy thông tin người dùng ngay sau khi đăng nhập thành công
+      try {
+        const response = await fetch(
+          "http://localhost:8081/api/v1/users/myInfo",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+
+        // Kiểm tra trạng thái response
+        if (!response.ok) {
+          // Nếu API trả về lỗi (ví dụ: 401 Unauthorized)
+          throw new Error('API call failed');
+        }
+
+        const data = await response.json();
+        console.log("User details:", data);
+
+        // Dispatch action để lưu thông tin người dùng vào Redux
+        dispatch(setUserDetails(data));
+
+        // Thông báo đăng nhập thành công và điều hướng
+        message.success("Đăng nhập thành công");
+        navigate("/");
+      } catch (userInfoError) {
+        console.error("Lỗi khi lấy thông tin người dùng:", userInfoError);
+        // Vẫn điều hướng người dùng vì đã đăng nhập thành công
+        navigate("/");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setSnackBarMessage("Tài khoản hoặc mật khẩu không chính xác!");
+      setSnackBarOpen(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

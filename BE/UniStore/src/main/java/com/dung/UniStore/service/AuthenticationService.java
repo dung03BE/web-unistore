@@ -43,7 +43,6 @@ public class AuthenticationService {
             // Trả về phản hồi lỗi nếu không tìm thấy người dùng
             return AuthenticationResponse.builder()
                     .authenticated(false)
-
                     .build();
         }
         //check password

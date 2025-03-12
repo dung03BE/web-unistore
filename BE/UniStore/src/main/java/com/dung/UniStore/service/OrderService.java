@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -113,6 +114,16 @@ public class OrderService implements IOrderService{
         OrderResponse orderResponse = orderMapper.toOrderResponse(order);
         return orderResponse;
     }
+
+    @Override
+    public List<OrderResponse> getOrderByUserId(int userId) {
+        List<Order> orders = orderRepository.findAllByUserId(userId); // Không cần ép kiểu
+        List<OrderResponse> orderResponses = orders.stream()
+                .map(orderMapper::toOrderResponse) // Chuyển đổi từng Order thành OrderResponse
+                .collect(Collectors.toList());
+        return orderResponses;
+    }
+
     public void deleteCartAndItems(Long cartId) {
         Cart cart = cartRepository.findById(cartId)
                 .orElseThrow(() -> new RuntimeException("Cart not found!"));

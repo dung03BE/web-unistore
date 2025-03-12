@@ -21,7 +21,7 @@ public class OrderDetail {
     @JoinColumn(name="order_id")
     private Order order;
     @ManyToOne
-    @JoinColumn(name="product_id")
+    @JoinColumn(name="product_id", referencedColumnName = "id")
     private Product product;
     @JoinColumn(name="price",nullable = false)
     private BigDecimal price;

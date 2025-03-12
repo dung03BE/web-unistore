@@ -4,6 +4,7 @@ import com.dung.UniStore.dto.response.UserResponse;
 import com.dung.UniStore.entity.Role;
 import com.dung.UniStore.entity.User;
 import com.dung.UniStore.dto.request.UserCreationRequest;
+import com.dung.UniStore.exception.ApiException;
 import com.dung.UniStore.exception.AppException;
 import com.dung.UniStore.exception.ErrorCode;
 import com.dung.UniStore.mapper.UserMapper;
@@ -29,6 +30,7 @@ public class UserService {
     private final IRoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+
     public UserResponse createUser(UserCreationRequest form) throws Exception {
 
         String phoneNumber = form.getPhoneNumber();
@@ -36,21 +38,17 @@ public class UserService {
         if (userRepository.existsByPhoneNumber(phoneNumber)) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
-
-        // Kiểm tra Role tồn tại không
-        Role role = roleRepository.findById(form.getRoleId()).orElseThrow(() -> new Exception("Role not found"));
-
-        if (role.getName().toUpperCase().equals(Role.ADMIN)) {
-            // Không được phép
-            throw new Exception("Admin role cannot be assigned");
+        if (userRepository.existsByEmail(form.getEmail())) {
+            throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
-
+        Role defaultRole = (Role) roleRepository.findByName("USER")
+                .orElseThrow(() -> new Exception("Default role not found"));
         // Sử dụng MapStruct để ánh xạ DTO sang Entity
         log.debug("UserCreationRequest before mapping: {}", form);
         User user = userMapper.toUser(form);
         log.info("Mapped User: {}", user);
-        user.setRole(role);
 
+        user.setRole(defaultRole);
         // Kiểm tra nếu không có accountId, bắt buộc phải có password
         if (form.getFacebookAccountId() == 0 && form.getGoogleAccountId() == 0) {
             String password = form.getPassword();
@@ -76,13 +74,15 @@ public class UserService {
         log.info("In method get info");
         return userRepository.findAll();
     }
-//post hoox tro them laays đúng user dang login
+
+    //post hoox tro them laays đúng user dang login
     @PostAuthorize("returnObject.phoneNumber==authentication.name")
     @Cacheable(value = "users", key = "#id")
     public User getUserById(int id) {
         log.info("In method get info");
         return userRepository.findById(id).get();
     }
+
     public UserResponse getMyInfo() throws Exception {
         var context = SecurityContextHolder.getContext();
         String name = context.getAuthentication().getName();
@@ -93,4 +93,72 @@ public class UserService {
         return UserResponse.fromEntity(user); // Chuyển từ User sang UserResponse
     }
 
+    public UserResponse updateUser(UserCreationRequest request, Long userId) throws ApiException {
+        User user = userRepository.findById(Math.toIntExact(userId)).orElseThrow(
+                () -> new AppException(ErrorCode.USER_NOT_EXISTED)
+        );
+        user.setFullName(request.getFullName());
+        //user.setPassword(request.getPassword());
+        user.setEmail(request.getEmail());
+        user.setAddress(request.getAddress());
+        if (!user.getPhoneNumber().equals(request.getPhoneNumber())) {
+            if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
+                throw new ApiException("Số điện thoại đã tồn tại trong hệ thống!");
+            } else {
+                user.setPhoneNumber(request.getPhoneNumber());
+            }
+        }
+
+        user.setDateOfBirth(request.getDateOfBirth());
+
+        userRepository.save(user);
+        return userMapper.toUserResponse(user);
+    }
+
+    public UserResponse updateUserPassword(UserCreationRequest request, Long userId) throws Exception {
+        User user = userRepository.findById(Math.toIntExact(userId)).orElseThrow(
+                () -> new AppException(ErrorCode.USER_NOT_EXISTED)
+        );
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new AppException(ErrorCode.valueOf("Mật khẩu không chính xác")); // Hoặc lỗi tương tự
+        }
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            String encodedPassword = passwordEncoder.encode(request.getPassword());
+            user.setPassword(encodedPassword);
+        }
+        userRepository.save(user);
+        return userMapper.toUserResponse(user);
+    }
+
+    public UserResponse createAdminUser(UserCreationRequest form, Long userId) throws Exception {
+        String phoneNumber = form.getPhoneNumber();
+        // Kiểm tra số điện thoại đã tồn tại chưa
+        if (userRepository.existsByPhoneNumber(phoneNumber)) {
+            throw new AppException(ErrorCode.USER_EXISTED);
+        }
+        if (userRepository.existsByEmail(form.getEmail())) {
+            throw new AppException(ErrorCode.EMAIL_EXISTED);
+        }
+        // Kiểm tra Role tồn tại không
+        Role role = roleRepository.findById(form.getRoleId()).orElseThrow(() ->
+                new Exception("Role not found"));
+        // Sử dụng MapStruct để ánh xạ DTO sang Entity
+        log.debug("UserCreationRequest before mapping: {}", form);
+        User user = userMapper.toUser(form);
+        log.info("Mapped User: {}", user);
+        user.setRole(role);
+        // Kiểm tra nếu không có accountId, bắt buộc phải có password
+        if (form.getFacebookAccountId() == 0 && form.getGoogleAccountId() == 0) {
+            String password = form.getPassword();
+            String encodedPassword = passwordEncoder.encode(password); // Mã hóa mật khẩu
+            user.setPassword(encodedPassword);
+        }
+        try {
+            user = userRepository.save(user);
+        } catch (DataIntegrityViolationException exception) {
+            throw new AppException(ErrorCode.USER_EXISTED);
+        }
+        // Trả về phản hồi sử dụng mapper
+        return userMapper.toUserResponse(user);
+    }
 }
