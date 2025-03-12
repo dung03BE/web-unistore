@@ -3,6 +3,7 @@ import Dashboard from "../admin/Dashboard/Dashboard";
 
 import LayoutAdmin from "../admin/LayoutAdmin";
 import OrderManageMent from "../admin/OrderManagement";
+import ProductCategories from "../admin/ProductCategories";
 import ProductList from "../admin/ProductList";
 import StaffManagement from "../admin/StaffManagement";
 import SystemSettings from "../admin/SystemSettings";
@@ -37,7 +38,7 @@ export const adminRoutes = {
                 },
                 {
                     path: "products/categories",
-                    // element: <ProductCategories />,
+                    element: <ProductCategories />,
                 },
                 {
                     path: "orders",

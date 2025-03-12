@@ -1,8 +1,247 @@
+import React, { useState, useEffect } from "react";
+import { getProductList } from "../services/productService";
+import {
+    Table,
+    Carousel,
+    Button,
+    Modal,
+    Pagination,
+    notification,
+    Collapse,
+} from "antd";
+import "../admin/ProductList.scss";
+import Search from "antd/es/transfer/search";
+import { AntDesignOutlined, AppstoreOutlined, AudioOutlined } from "@ant-design/icons";
+
+const DEFAULT_IMAGE =
+    "https://png.pngtree.com/png-clipart/20220113/ourmid/pngtree-transparent-bubble-simple-bubble-png-image_4158141.png";
+
 function ProductList() {
+    const [products, setProducts] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [groupedProducts, setGroupedProducts] = useState({});
+    const [totalPages, setTotalPages] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [loading, setLoading] = useState(true);
+    const [editModalVisible, setEditModalVisible] = useState(false);
+    const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [activeCollapseKeys, setActiveCollapseKeys] = useState([]); // Khởi tạo rỗng để ban đầu tất cả panel đều đóng
+
+    const suffix = (
+        <AudioOutlined
+            style={{
+                fontSize: 16,
+                color: "#1677ff",
+            }}
+        />
+    );
+
+    const onSearch = (value, _e, info) => console.log(info?.source, value);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            const data = await getProductList(currentPage - 1);
+            if (data) {
+                setProducts(data.content);
+                setTotalPages(data.totalPages);
+
+                // Giả sử danh mục được lấy từ API
+                const fetchedCategories = [
+                    { id: 1, name: "SamSung" },
+                    { id: 2, name: "Apple" },
+                    { id: 3, name: "Oppo" },
+                ];
+                setCategories(fetchedCategories);
+                // Không gán activeCollapseKeys, giữ nguyên mảng rỗng để các panel mặc định đóng
+
+                // Nhóm sản phẩm theo categoryId
+                const grouped = {};
+                data.content.forEach((product) => {
+                    if (!grouped[product.categoryId]) {
+                        grouped[product.categoryId] = [];
+                    }
+                    grouped[product.categoryId].push(product);
+                });
+                setGroupedProducts(grouped);
+            }
+            setLoading(false);
+        };
+        fetchData();
+    }, [currentPage]);
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
+
+    const getImageUrl = (product) => {
+        if (product.thumbnails && product.thumbnails.length > 0) {
+            return product.thumbnails.map(
+                (thumbnail) => `http://localhost:8081/uploads/${thumbnail.imageUrl}`
+            );
+        }
+        return [DEFAULT_IMAGE];
+    };
+
+    const showEditModal = (product) => {
+        setSelectedProduct(product);
+        setEditModalVisible(true);
+    };
+
+    const showDeleteModal = (product) => {
+        setSelectedProduct(product);
+        setDeleteModalVisible(true);
+    };
+
+    const handleEditCancel = () => {
+        setEditModalVisible(false);
+    };
+
+    const handleDeleteCancel = () => {
+        setDeleteModalVisible(false);
+    };
+
+    const handleEditConfirm = () => {
+        notification.success({ message: "Sản phẩm đã được chỉnh sửa" });
+        setEditModalVisible(false);
+    };
+
+    const handleDeleteConfirm = () => {
+        notification.success({ message: "Sản phẩm đã được xóa" });
+        setDeleteModalVisible(false);
+    };
+
+    const columns = [
+        { title: "ID", dataIndex: "id", key: "id" },
+        { title: "Tên", dataIndex: "name", key: "name" },
+        { title: "Giá (VNĐ)", dataIndex: "price", key: "price" },
+        {
+            title: "Hình ảnh",
+            dataIndex: "thumbnails",
+            key: "thumbnails",
+            render: (_, product) => (
+                <div style={{ width: "100px", height: "100px" }}>
+                    <Carousel>
+                        {getImageUrl(product).map((imageUrl, index) => (
+                            <img
+                                key={index}
+                                src={imageUrl}
+                                alt={product.name}
+                                style={{
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: "cover",
+                                }}
+                            />
+                        ))}
+                    </Carousel>
+                </div>
+            ),
+        },
+        {
+            title: "Màu sắc",
+            dataIndex: "colors",
+            key: "colors",
+            render: (colors) =>
+                colors && colors.length > 0
+                    ? colors.map((color) => color.color).join(" / ")
+                    : "Không có màu",
+        },
+        {
+            title: "Thao tác",
+            key: "action",
+            render: (_, product) => (
+                <>
+                    <Button type="primary" onClick={() => showEditModal(product)}>
+                        Chỉnh sửa
+                    </Button>
+                    <Button type="danger" onClick={() => showDeleteModal(product)}>
+                        Xóa
+                    </Button>
+                </>
+            ),
+        },
+    ];
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
     return (
-        <>
-            Manage ProductList
-        </>
-    )
+        <div className="productList">
+            <div className="headerPro">
+                <Button
+                    style={{ width: "150px" }}
+                    type="primary"
+                    size="large"
+                    icon={<AntDesignOutlined />}
+                >
+                    Thêm mới
+                </Button>
+                <div style={{ marginLeft: "auto", maxWidth: "300px" }}>
+                    <Search
+                        placeholder="Tìm kiếm sản phẩm"
+                        allowClear
+                        enterButton="Tìm kiếm"
+                        size="large"
+                        onSearch={onSearch}
+                    />
+                </div>
+            </div>
+
+            <h2>Quản lý Sản phẩm</h2>
+            <Collapse
+                activeKey={activeCollapseKeys}
+                onChange={(keys) => setActiveCollapseKeys(keys)}
+            >
+                {categories.map((category) => (
+                    <Collapse.Panel
+                        header={
+                            <span>
+                                <AppstoreOutlined style={{ marginRight: 8 }} />
+                                Hãng sản phẩm: {category.name}
+                            </span>
+                        }
+                        key={category.id.toString()}
+                    >
+                        <Table
+                            dataSource={groupedProducts[category.id] || []}
+                            columns={columns}
+                            pagination={false}
+                            rowKey="id"
+                        />
+                    </Collapse.Panel>
+                ))}
+            </Collapse>
+
+            {/* Pagination toàn cục */}
+            <Pagination
+                current={currentPage}
+                total={totalPages * 10}
+                onChange={handlePageChange}
+                style={{ marginTop: "20px", textAlign: "center" }}
+            />
+
+            <Modal
+                title="Chỉnh sửa sản phẩm"
+                visible={editModalVisible}
+                onOk={handleEditConfirm}
+                onCancel={handleEditCancel}
+            >
+                {/* Form chỉnh sửa sản phẩm */}
+            </Modal>
+
+            <Modal
+                title="Xóa sản phẩm"
+                visible={deleteModalVisible}
+                onOk={handleDeleteConfirm}
+                onCancel={handleDeleteCancel}
+            >
+                <p>Bạn có chắc chắn muốn xóa sản phẩm này?</p>
+            </Modal>
+        </div>
+    );
 }
+
 export default ProductList;

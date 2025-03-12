@@ -5,7 +5,6 @@ function AllRoute() {
     const element = useRoutes(router);
     return (
         <>
-
             {element}
         </>
     )

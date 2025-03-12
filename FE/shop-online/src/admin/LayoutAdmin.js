@@ -8,8 +8,11 @@ import {
     TeamOutlined,
     GiftOutlined,
     SettingOutlined,
+    UploadOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { setUserDetails } from '../actions/user';
+import { removeToken } from '../services/localStorageService';
 
 const { Header, Content, Sider } = Layout;
 
@@ -70,11 +73,17 @@ const menuItems = [
         icon: <SettingOutlined />,
         label: 'Cấu hình hệ thống',
     },
+    {
+        key: 'logout',
+        icon: <UploadOutlined />,
+        label: 'Đăng suất',
+    },
 ];
 
 const LayoutAdmin = () => {
     const [collapsed, setCollapsed] = useState(false);
     const navigate = useNavigate();
+
     const location = useLocation();
 
     // Xác định key active dựa vào đường dẫn hiện tại
@@ -85,12 +94,21 @@ const LayoutAdmin = () => {
         }
         return 'dashboard';
     };
+    const handleLogout = () => {
+        removeToken();
+        setUserDetails(null);
+        navigate('/login');
 
+    };
     const {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
 
     const handleMenuClick = ({ key }) => {
+        if (key === 'logout') {
+            handleLogout();
+            return; // Dừng xử lý tiếp nếu là logout
+        }
         let path;
         // Xử lý điều hướng dựa trên key của menu
         switch (key) {
@@ -120,6 +138,9 @@ const LayoutAdmin = () => {
                 break;
             case 'settings':
                 path = '/admin/settings';
+                break;
+            case 'logout':
+                path = '/logout';
                 break;
             default:
                 path = '/admin/dashboard';
