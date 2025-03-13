@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getProductById } from "../../services/productService";
-import { Button, Carousel, Image, notification } from "antd";
+import { Button, Carousel, Image, message, notification } from "antd";
 import "./ProductDetails.scss";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCartSuccess, updateQuantity } from "../../actions/cart";
@@ -121,7 +121,10 @@ function ProductDetails({ products }) {
             //         color: selectedColor,
             //     },
             // });
-
+            if (updatedCart.code !== 1013) {
+                message.error("Out of stock");
+                return;
+            }
             notification.success({
                 message: 'Thành công',
                 description: 'Sản phẩm đã được thêm vào giỏ hàng.',

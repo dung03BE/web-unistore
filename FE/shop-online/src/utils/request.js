@@ -68,6 +68,19 @@ export const postAuth = async (path, options) => {
     const result = await response.json();
     return result;
 };
+export const postAuth2 = async (path, formData) => {
+    const accessToken = getAccessToken();
+    const response = await fetch(API_DOMAIN + path, {
+        method: "POST",
+        headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${accessToken}`,
+        },
+        body: formData,
+    });
+    const result = await response.json();
+    return result;
+};
 
 export const putAuth = async (path, options) => {
     const accessToken = getAccessToken();

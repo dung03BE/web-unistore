@@ -7,26 +7,25 @@ import {
     Modal,
     Pagination,
     notification,
-    Collapse,
 } from "antd";
 import "../admin/ProductList.scss";
 import Search from "antd/es/transfer/search";
-import { AntDesignOutlined, AppstoreOutlined, AudioOutlined } from "@ant-design/icons";
+import { AntDesignOutlined, AudioOutlined } from "@ant-design/icons";
+import AddProductModal from "./AddProductModal"; // Đảm bảo đường dẫn import đúng
 
 const DEFAULT_IMAGE =
     "https://png.pngtree.com/png-clipart/20220113/ourmid/pngtree-transparent-bubble-simple-bubble-png-image_4158141.png";
 
 function ProductList() {
     const [products, setProducts] = useState([]);
-    const [categories, setCategories] = useState([]);
-    const [groupedProducts, setGroupedProducts] = useState({});
     const [totalPages, setTotalPages] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(true);
     const [editModalVisible, setEditModalVisible] = useState(false);
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
-    const [activeCollapseKeys, setActiveCollapseKeys] = useState([]); // Khởi tạo rỗng để ban đầu tất cả panel đều đóng
+    const [addModalVisible, setAddModalVisible] = useState(false);
+    const [categories, setCategories] = useState([]);
 
     const suffix = (
         <AudioOutlined
@@ -39,35 +38,23 @@ function ProductList() {
 
     const onSearch = (value, _e, info) => console.log(info?.source, value);
 
+    const fetchData = async () => {
+        setLoading(true);
+        const data = await getProductList(currentPage - 1);
+        if (data) {
+            setProducts(data.content);
+            setTotalPages(data.totalPages);
+            const fetchedCategories = [
+                { id: 1, name: "SamSung" },
+                { id: 2, name: "Apple" },
+                { id: 3, name: "Oppo" },
+            ];
+            setCategories(fetchedCategories);
+        }
+        setLoading(false);
+    };
+
     useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            const data = await getProductList(currentPage - 1);
-            if (data) {
-                setProducts(data.content);
-                setTotalPages(data.totalPages);
-
-                // Giả sử danh mục được lấy từ API
-                const fetchedCategories = [
-                    { id: 1, name: "SamSung" },
-                    { id: 2, name: "Apple" },
-                    { id: 3, name: "Oppo" },
-                ];
-                setCategories(fetchedCategories);
-                // Không gán activeCollapseKeys, giữ nguyên mảng rỗng để các panel mặc định đóng
-
-                // Nhóm sản phẩm theo categoryId
-                const grouped = {};
-                data.content.forEach((product) => {
-                    if (!grouped[product.categoryId]) {
-                        grouped[product.categoryId] = [];
-                    }
-                    grouped[product.categoryId].push(product);
-                });
-                setGroupedProducts(grouped);
-            }
-            setLoading(false);
-        };
         fetchData();
     }, [currentPage]);
 
@@ -112,6 +99,10 @@ function ProductList() {
         setDeleteModalVisible(false);
     };
 
+    const handleAddSuccess = () => {
+        fetchData();
+    };
+
     const columns = [
         { title: "ID", dataIndex: "id", key: "id" },
         { title: "Tên", dataIndex: "name", key: "name" },
@@ -145,7 +136,7 @@ function ProductList() {
             key: "colors",
             render: (colors) =>
                 colors && colors.length > 0
-                    ? colors.map((color) => color.color).join(" / ")
+                    ? colors.map((color) => color.color || color).join(" / ")
                     : "Không có màu",
         },
         {
@@ -176,6 +167,7 @@ function ProductList() {
                     type="primary"
                     size="large"
                     icon={<AntDesignOutlined />}
+                    onClick={() => setAddModalVisible(true)}
                 >
                     Thêm mới
                 </Button>
@@ -191,45 +183,25 @@ function ProductList() {
             </div>
 
             <h2>Quản lý Sản phẩm</h2>
-            <Collapse
-                activeKey={activeCollapseKeys}
-                onChange={(keys) => setActiveCollapseKeys(keys)}
-            >
-                {categories.map((category) => (
-                    <Collapse.Panel
-                        header={
-                            <span>
-                                <AppstoreOutlined style={{ marginRight: 8 }} />
-                                Hãng sản phẩm: {category.name}
-                            </span>
-                        }
-                        key={category.id.toString()}
-                    >
-                        <Table
-                            dataSource={groupedProducts[category.id] || []}
-                            columns={columns}
-                            pagination={false}
-                            rowKey="id"
-                        />
-                    </Collapse.Panel>
-                ))}
-            </Collapse>
+            <Table
+                dataSource={products}
+                columns={columns}
+                pagination={false}
+                rowKey="id"
+            />
 
-            {/* Pagination toàn cục */}
             <Pagination
                 current={currentPage}
                 total={totalPages * 10}
                 onChange={handlePageChange}
                 style={{ marginTop: "20px", textAlign: "center" }}
             />
-
             <Modal
                 title="Chỉnh sửa sản phẩm"
                 visible={editModalVisible}
                 onOk={handleEditConfirm}
                 onCancel={handleEditCancel}
             >
-                {/* Form chỉnh sửa sản phẩm */}
             </Modal>
 
             <Modal
@@ -240,6 +212,13 @@ function ProductList() {
             >
                 <p>Bạn có chắc chắn muốn xóa sản phẩm này?</p>
             </Modal>
+
+            <AddProductModal
+                visible={addModalVisible}
+                onCancel={() => setAddModalVisible(false)}
+                onSuccess={handleAddSuccess}
+                categories={categories}
+            />
         </div>
     );
 }

@@ -12,6 +12,7 @@ export const addToCartAPI = async (productId, quantity, color) => {
         console.error("Lỗi khi thêm sản phẩm vào giỏ hàng:", error);
         throw error; // Re-throw lỗi để component có thể xử lý
     }
+
 };
 
 export const putCartApi = async (productId, quantity, color) => {

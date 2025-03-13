@@ -1,4 +1,4 @@
-import { del, get, path, post } from "../utils/request";
+import { del, get, path, post, postAuth, postAuth2 } from "../utils/request";
 
 export const getProductList = async (page = 0, size = 8, minPrice, maxPrice, search) => {
     let url = `products?page=${page}&size=${size}`;
@@ -34,11 +34,38 @@ export const getAdList = async () => {
     ];
 };
 
-/* nếu có api 
-import axios from "axios";
-
-export const getAdList = async () => {
-    const response = await axios.get("https://your-api.com/ads"); // URL API thật
-    return response.data;
+export const createProduct = async (product) => {
+    const path = `products`;
+    try {
+        const result = await postAuth(path, product);
+        return result;
+    } catch (error) {
+        console.error("Lỗi khi khi tạo mới product:", error);
+        throw error;
+    }
 };
-*/
+export const createProductImages = async (product) => {
+    const path = `products/uploads`;
+    try {
+        const result = await postAuth(path, product);
+        return result;
+    } catch (error) {
+        console.error("Lỗi khi khi tạo mới product:", error);
+        throw error;
+    }
+};
+export const uploadImages = async (id, files) => {
+    const formData = new FormData();
+    files.forEach((file) => {
+        console.log("Chạy vào đây");
+        formData.append("files", file.originFileObj);
+    });
+    const path = `products/uploads/${id}`;
+    try {
+        const result = await postAuth2(path, formData);
+        return result;
+    } catch (error) {
+        console.error("Error uploading images:", error);
+        throw error;
+    }
+};
