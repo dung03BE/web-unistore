@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getProductListByCategoryId } from "../services/productService";
+import { deleteProduct, getProductListByCategoryId } from "../services/productService";
 import {
     Table,
     Carousel,
@@ -140,9 +140,17 @@ function ProductList() {
         setEditModalVisible(false);
     };
 
-    const handleDeleteConfirm = () => {
-        notification.success({ message: "Sản phẩm đã được xóa" });
-        setDeleteModalVisible(false);
+    const handleDeleteConfirm = async () => {
+        try {
+            console.log(selectedProduct);
+            await deleteProduct(selectedProduct.id); // Gọi API xóa sản phẩm
+            notification.success({ message: "Sản phẩm đã được xóa" });
+            setDeleteModalVisible(false);
+            fetchAllCategoryProducts(); // Cập nhật lại danh sách sản phẩm
+        } catch (error) {
+            console.error("Lỗi khi xóa sản phẩm:", error);
+            notification.error({ message: "Lỗi khi xóa sản phẩm" });
+        }
     };
 
     // Callback sau khi thêm sản phẩm thành công

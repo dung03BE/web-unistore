@@ -1,4 +1,4 @@
-import { del, get, path, post, postAuth, postAuth2 } from "../utils/request";
+import { del, deleteAuth, get, path, post, postAuth, postAuth2 } from "../utils/request";
 
 export const getProductList = async (page = 0, size = 8, minPrice, maxPrice, search) => {
     let url = `products?page=${page}&size=${size}`;
@@ -70,6 +70,17 @@ export const uploadImages = async (id, files) => {
         return result;
     } catch (error) {
         console.error("Error uploading images:", error);
+        throw error;
+    }
+};
+
+export const deleteProduct = async (id) => {
+    const path = `products/${id}`;
+    try {
+        const result = await deleteAuth(path);
+        return result;
+    } catch (error) {
+        console.error("Lỗi khi khi xóa mới product:", error);
         throw error;
     }
 };

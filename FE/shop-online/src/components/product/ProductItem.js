@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCartSuccess } from "../../actions/cart";
 import "./product.scss";
-import { Button, message, Modal, notification, Space } from "antd";
+import { Button, message, Modal, notification, Rate, Space } from "antd";
 import { addToCartAPI, getCart } from "../../services/cartService";
-
+import { HeartOutlined, HeartTwoTone } from "@ant-design/icons";
 function ProductItem(props) {
     const { item } = props;
     const dispatch = useDispatch();
@@ -77,9 +77,12 @@ function ProductItem(props) {
                 e.target.src = DEFAULT_IMAGE;
             }} />
             <h3 className="product__title">{item.name}</h3>
+
             <div className="product__price">{item.price.toLocaleString()}₫</div>
             <div className="product__description">{item.description}</div>
+            <Rate allowHalf defaultValue={4.9} style={{ marginLeft: '10px' }} /> <HeartOutlined style={{ marginLeft: '150px' }} />
             <div className="product__buttons">
+
                 <button onClick={handleAddToCart}>Thêm vào giỏ 🛒</button>
                 <button onClick={handleViewDetails}>Chi tiết</button>
             </div>
