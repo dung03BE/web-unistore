@@ -18,7 +18,11 @@ export const getProductList = async (page = 0, size = 8, minPrice, maxPrice, sea
     const result = await get(url);
     return result.result;
 };
-
+export const getProductListByCategoryId = async (page = 0, size = 8, categoryId) => {
+    let url = `products/getAllBy-category/${categoryId}?page=${page}&size=${size}`;
+    const result = await get(url);
+    return result.result;
+};
 export const getProductById = async (id) => {
     const result = await get(`products/${id}`); // API để lấy chi tiết sản phẩm theo ID
     console.log("He", result.result);

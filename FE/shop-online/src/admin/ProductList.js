@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getProductList } from "../services/productService";
+import { getProductListByCategoryId } from "../services/productService";
 import {
     Table,
     Carousel,
@@ -7,25 +7,38 @@ import {
     Modal,
     Pagination,
     notification,
+    Collapse,
 } from "antd";
 import "../admin/ProductList.scss";
 import Search from "antd/es/transfer/search";
-import { AntDesignOutlined, AudioOutlined } from "@ant-design/icons";
-import AddProductModal from "./AddProductModal"; // Đảm bảo đường dẫn import đúng
+import { AntDesignOutlined, AppstoreOutlined, AudioOutlined } from "@ant-design/icons";
+import AddProductModal from "./AddProductModal";
 
 const DEFAULT_IMAGE =
     "https://png.pngtree.com/png-clipart/20220113/ourmid/pngtree-transparent-bubble-simple-bubble-png-image_4158141.png";
 
 function ProductList() {
     const [products, setProducts] = useState([]);
-    const [totalPages, setTotalPages] = useState(0);
-    const [currentPage, setCurrentPage] = useState(1);
+    const [categories, setCategories] = useState([]);
+    const [categoryProducts, setCategoryProducts] = useState({});
+    const [totalPagesMap, setTotalPagesMap] = useState({});
+    const [currentPageMap, setCurrentPageMap] = useState({});
     const [loading, setLoading] = useState(true);
     const [editModalVisible, setEditModalVisible] = useState(false);
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
+    const [activeCollapseKeys, setActiveCollapseKeys] = useState([]);
     const [addModalVisible, setAddModalVisible] = useState(false);
-    const [categories, setCategories] = useState([]);
+
+    // Hard-coded categories for now
+    // In a real application, you'd fetch these from an API
+    const fetchedCategories = [
+        { id: 1, name: "SamSung" },
+        { id: 2, name: "Apple" },
+        { id: 3, name: "Oppo" },
+        { id: 4, name: "Xiaomi" },
+        { id: 5, name: "Vivo" },
+    ];
 
     const suffix = (
         <AudioOutlined
@@ -38,28 +51,61 @@ function ProductList() {
 
     const onSearch = (value, _e, info) => console.log(info?.source, value);
 
-    const fetchData = async () => {
-        setLoading(true);
-        const data = await getProductList(currentPage - 1);
-        if (data) {
-            setProducts(data.content);
-            setTotalPages(data.totalPages);
-            const fetchedCategories = [
-                { id: 1, name: "SamSung" },
-                { id: 2, name: "Apple" },
-                { id: 3, name: "Oppo" },
-            ];
-            setCategories(fetchedCategories);
+    const fetchCategoryProducts = async (categoryId, page = 0) => {
+        try {
+            const data = await getProductListByCategoryId(page, 8, categoryId);
+            if (data) {
+                // Update products for this specific category
+                setCategoryProducts(prev => ({
+                    ...prev,
+                    [categoryId]: data.content
+                }));
+
+                // Update total pages for this category
+                setTotalPagesMap(prev => ({
+                    ...prev,
+                    [categoryId]: data.totalPages
+                }));
+            }
+        } catch (error) {
+            console.error(`Error fetching products for category ${categoryId}:`, error);
+            notification.error({
+                message: "Lỗi",
+                description: `Không thể tải sản phẩm cho danh mục ${categoryId}`
+            });
         }
+    };
+
+    const fetchAllCategoryProducts = async () => {
+        setLoading(true);
+        setCategories(fetchedCategories);
+
+        // Initialize current page for each category
+        const initialCurrentPageMap = {};
+        fetchedCategories.forEach(category => {
+            initialCurrentPageMap[category.id] = 1;
+        });
+        setCurrentPageMap(initialCurrentPageMap);
+
+        // Fetch products for each category
+        const fetchPromises = fetchedCategories.map(category =>
+            fetchCategoryProducts(category.id, 0)
+        );
+
+        await Promise.all(fetchPromises);
         setLoading(false);
     };
 
     useEffect(() => {
-        fetchData();
-    }, [currentPage]);
+        fetchAllCategoryProducts();
+    }, []);
 
-    const handlePageChange = (page) => {
-        setCurrentPage(page);
+    const handlePageChange = (page, categoryId) => {
+        setCurrentPageMap(prev => ({
+            ...prev,
+            [categoryId]: page
+        }));
+        fetchCategoryProducts(categoryId, page - 1);
     };
 
     const getImageUrl = (product) => {
@@ -99,8 +145,10 @@ function ProductList() {
         setDeleteModalVisible(false);
     };
 
+    // Callback sau khi thêm sản phẩm thành công
     const handleAddSuccess = () => {
-        fetchData();
+        // Sau khi thêm thành công, cập nhật lại danh sách sản phẩm
+        fetchAllCategoryProducts();
     };
 
     const columns = [
@@ -183,25 +231,43 @@ function ProductList() {
             </div>
 
             <h2>Quản lý Sản phẩm</h2>
-            <Table
-                dataSource={products}
-                columns={columns}
-                pagination={false}
-                rowKey="id"
-            />
+            <Collapse
+                activeKey={activeCollapseKeys}
+                onChange={(keys) => setActiveCollapseKeys(keys)}
+            >
+                {categories.map((category) => (
+                    <Collapse.Panel
+                        header={
+                            <span>
+                                <AppstoreOutlined style={{ marginRight: 8 }} />
+                                Hãng sản phẩm: {category.name}
+                            </span>
+                        }
+                        key={category.id.toString()}
+                    >
+                        <Table
+                            dataSource={categoryProducts[category.id] || []}
+                            columns={columns}
+                            pagination={false}
+                            rowKey="id"
+                        />
+                        <Pagination
+                            current={currentPageMap[category.id] || 1}
+                            total={(totalPagesMap[category.id] || 1) * 10}
+                            onChange={(page) => handlePageChange(page, category.id)}
+                            style={{ marginTop: "20px", textAlign: "center" }}
+                        />
+                    </Collapse.Panel>
+                ))}
+            </Collapse>
 
-            <Pagination
-                current={currentPage}
-                total={totalPages * 10}
-                onChange={handlePageChange}
-                style={{ marginTop: "20px", textAlign: "center" }}
-            />
             <Modal
                 title="Chỉnh sửa sản phẩm"
                 visible={editModalVisible}
                 onOk={handleEditConfirm}
                 onCancel={handleEditCancel}
             >
+                {/* Form chỉnh sửa sản phẩm */}
             </Modal>
 
             <Modal
@@ -213,6 +279,7 @@ function ProductList() {
                 <p>Bạn có chắc chắn muốn xóa sản phẩm này?</p>
             </Modal>
 
+            {/* Sử dụng AddProductModal */}
             <AddProductModal
                 visible={addModalVisible}
                 onCancel={() => setAddModalVisible(false)}
