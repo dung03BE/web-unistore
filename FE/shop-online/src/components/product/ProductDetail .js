@@ -112,16 +112,7 @@ function ProductDetails({ products }) {
             await addToCartAPI(product.id, 1, selectedColor);
             const updatedCart = await getCart();
             dispatch(fetchCartSuccess(updatedCart));
-
-            // Dispatch action ADD_TO_CART
-            // dispatch({
-            //     type: "ADD_TO_CART",
-            //     info: {
-            //         id: product.id,
-            //         color: selectedColor,
-            //     },
-            // });
-            if (updatedCart.code !== 1013) {
+            if (updatedCart.code == 1013) {
                 message.error("Out of stock");
                 return;
             }
