@@ -213,3 +213,12 @@
     content: "\1F697"; 
     font-size: 18px;
 }
+.filter-option {
+    /* ... */
+    border: 2px solid transparent; /* Viền mặc định trong suốt */
+    transition: border-color 0.3s ease; /* Hiệu ứng chuyển đổi màu viền */
+}
+
+.filter-option.selected {
+    border-color: rgb(43, 43, 182); /* Màu viền khi được chọn */
+}
