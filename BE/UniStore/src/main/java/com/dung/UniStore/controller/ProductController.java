@@ -49,7 +49,7 @@ public class ProductController {
                 .result(productService.createProduct(request))
                 .build();
     }
-
+    @CrossOrigin(origins = "http://localhost:3001")
     @PostMapping(value = "uploads/{id}",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<List<ProductImage>> uploadImages(@PathVariable int id,@ModelAttribute("files")  List<MultipartFile> files)
@@ -146,11 +146,12 @@ public class ProductController {
                 .result(productResponsePage)
                 .build();
     }
-    @GetMapping("/getAll")
-    public ApiResponse<List<ProductResponse>> getAll()
+    @GetMapping("/getAllBy-category/{categoryId}")
+    public ApiResponse<Page<ProductResponse>> getAll(@PageableDefault(page = 0, size = 5) Pageable pageable,@PathVariable int categoryId)
     {
-        return ApiResponse.<List<ProductResponse>>builder()
-                .result(productService.getAll())
+        Page<ProductResponse> productResponsePage = productService.getAllProductsByCategory(pageable,categoryId);
+        return ApiResponse.<Page<ProductResponse>>builder()
+                .result(productResponsePage)
                 .build();
     }
     @GetMapping("{id}")
@@ -183,4 +184,5 @@ public class ProductController {
                 .result(productService.getProductByName(name))
                 .build();
     }
+
 }

@@ -137,7 +137,7 @@ public class CartService implements ICartService {
     }
 
     private Cart createCart() {
-        Cart userCart = cartRepository.findCartByEmail(authUtil.loggedInEmail());
+        Cart userCart = cartRepository.findCartByUserId(authUtil.loggedInUserId());
         if (userCart != null) {
             return userCart;
         }

@@ -1,9 +1,6 @@
 package com.dung.UniStore.mapper;
 
-import com.dung.UniStore.dto.request.ProductCreationRequest;
-import com.dung.UniStore.dto.request.ProductUpdateRequest;
-import com.dung.UniStore.dto.request.UserCreationRequest;
-import com.dung.UniStore.dto.request.UserUpdateRequest;
+import com.dung.UniStore.dto.request.*;
 import com.dung.UniStore.dto.response.ProductColorResponse;
 import com.dung.UniStore.dto.response.ProductDetailsResponse;
 import com.dung.UniStore.dto.response.ProductResponse;
@@ -34,11 +31,29 @@ public interface ProductMapper {
 
     // Phương thức ánh xạ danh sách ProductImage
     List<ProductResponse.ProductImageResponse> toProductImageResponses(List<ProductImage> images);
+
     // Ánh xạ ProductDetails sang ProductDetailsResponse
     ProductDetailsResponse toProductDetailsResponse(ProductDetails details);
+    // **MỚI**: Ánh xạ từ ProductDetailRequest sang ProductDetails
+    ProductDetails toProductDetails(ProductDetailsRequest request);
+
+    // **MỚI**: Cập nhật ProductDetails từ ProductDetailRequest
+    void updateProductDetails(@MappingTarget ProductDetails details, ProductDetailsRequest request);
+
     // Thêm phương thức ánh xạ ProductColor sang ProductColorResponse
     ProductResponse.ProductColorResponse toProductColorResponse(ProductColor productColor);
-
     List<ProductResponse.ProductColorResponse> toProductColorResponses(List<ProductColor> productColors);
+    default List<ProductColor> map(List<String> colors) {
+        if (colors == null) {
+            return null;
+        }
+        return colors.stream()
+                .map(color -> {
+                    ProductColor productColor = new ProductColor();
+                    productColor.setColor(color);
+                    return productColor;
+                })
+                .toList();
+    }
 
 }

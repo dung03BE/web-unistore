@@ -17,6 +17,6 @@ public class ProductColor {
     private String color; // Lưu trực tiếp tên màu
 
     @ManyToOne
-    @JoinColumn(name = "product_id")
+    @JoinColumn(name = "product_id",referencedColumnName = "id")
     private Product product;
 }

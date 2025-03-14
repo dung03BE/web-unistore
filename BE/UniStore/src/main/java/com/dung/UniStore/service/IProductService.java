@@ -28,4 +28,6 @@ public interface IProductService {
     ProductImage createProductImage(int id, ProductImageResponse build) throws Exception;
 
     List<ProductResponse> getAll();
+
+    Page<ProductResponse> getAllProductsByCategory(Pageable pageable,int categoryId);
 }

@@ -46,5 +46,9 @@ public class Product extends BaseEntity {
     private Double specialPrice;
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<ProductColor> colors;
+    private String brand;
+    private String model;
+    @Column(columnDefinition = "TINYINT")
+    private Byte available;
 
 }

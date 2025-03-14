@@ -24,4 +24,9 @@ public class ProductImage {
 
     @Column(name="image_url")
     private String imageUrl;
+    public ProductImage(Product product, String imageUrl) {
+        this.product = product;
+        this.imageUrl = imageUrl;
+    }
 }
+
