@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCartSuccess } from "../../actions/cart";
 import "./product.scss";
-import { Button, Modal, notification, Space } from "antd";
+import { Button, message, Modal, notification, Space } from "antd";
 import { addToCartAPI, getCart } from "../../services/cartService";
 
 function ProductItem(props) {
@@ -33,7 +33,10 @@ function ProductItem(props) {
                 await addToCartAPI(item.id, 1, selectedColor);
                 const updatedCart = await getCart();
                 dispatch(fetchCartSuccess(updatedCart));
-
+                if (updatedCart.code == 1013) {
+                    message.error("Out of stock");
+                    return;
+                }
                 notification.success({
                     message: 'Thành công',
                     description: 'Sản phẩm đã được thêm vào giỏ hàng.',
