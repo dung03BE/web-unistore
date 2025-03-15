@@ -13,7 +13,7 @@ import {
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { setUserDetails } from '../actions/user';
 import { removeToken } from '../services/localStorageService';
-
+import { persistor } from "../store";
 const { Header, Content, Sider } = Layout;
 
 // Cấu hình menu
@@ -97,6 +97,7 @@ const LayoutAdmin = () => {
     const handleLogout = () => {
         removeToken();
         setUserDetails(null);
+        persistor.purge();
         navigate('/login');
 
     };

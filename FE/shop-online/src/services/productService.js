@@ -1,4 +1,4 @@
-import { del, deleteAuth, get, path, post, postAuth, postAuth2 } from "../utils/request";
+import { del, deleteAuth, get, patchAuth, path, post, postAuth, postAuth2, putAuth } from "../utils/request";
 
 export const getProductList = async (page = 0, size = 8, minPrice, maxPrice, search) => {
     let url = `products?page=${page}&size=${size}`;
@@ -81,6 +81,16 @@ export const deleteProduct = async (id) => {
         return result;
     } catch (error) {
         console.error("Lỗi khi khi xóa mới product:", error);
+        throw error;
+    }
+};
+export const updateProduct = async (id, productData) => {
+    const path = `products/${id}`;
+    try {
+        const result = await putAuth(path, productData);
+        return result;
+    } catch (error) {
+        console.error("Lỗi khi khi cập nhật product:", error);
         throw error;
     }
 };

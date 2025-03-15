@@ -13,6 +13,7 @@ import "../admin/ProductList.scss";
 import Search from "antd/es/transfer/search";
 import { AntDesignOutlined, AppstoreOutlined, AudioOutlined } from "@ant-design/icons";
 import AddProductModal from "./AddProductModal";
+import EditProductModal from "./EditProductModal";
 
 const DEFAULT_IMAGE =
     "https://png.pngtree.com/png-clipart/20220113/ourmid/pngtree-transparent-bubble-simple-bubble-png-image_4158141.png";
@@ -119,6 +120,7 @@ function ProductList() {
 
     const showEditModal = (product) => {
         setSelectedProduct(product);
+        console.log("SP Cần sửa", product);
         setEditModalVisible(true);
     };
 
@@ -137,6 +139,8 @@ function ProductList() {
 
     const handleEditConfirm = () => {
         notification.success({ message: "Sản phẩm đã được chỉnh sửa" });
+        fetchAllCategoryProducts(); // Tải lại dữ liệu
+        handleEditSuccess();
         setEditModalVisible(false);
     };
 
@@ -158,7 +162,9 @@ function ProductList() {
         // Sau khi thêm thành công, cập nhật lại danh sách sản phẩm
         fetchAllCategoryProducts();
     };
-
+    const handleEditSuccess = () => {
+        fetchAllCategoryProducts(); // Cập nhật lại danh sách sản phẩm
+    };
     const columns = [
         { title: "ID", dataIndex: "id", key: "id" },
         { title: "Tên", dataIndex: "name", key: "name" },
@@ -269,14 +275,7 @@ function ProductList() {
                 ))}
             </Collapse>
 
-            <Modal
-                title="Chỉnh sửa sản phẩm"
-                visible={editModalVisible}
-                onOk={handleEditConfirm}
-                onCancel={handleEditCancel}
-            >
-                {/* Form chỉnh sửa sản phẩm */}
-            </Modal>
+
 
             <Modal
                 title="Xóa sản phẩm"
@@ -286,6 +285,15 @@ function ProductList() {
             >
                 <p>Bạn có chắc chắn muốn xóa sản phẩm này?</p>
             </Modal>
+            <EditProductModal
+                title="Chỉnh sửa sản phẩm"
+                visible={editModalVisible}
+                onCancel={handleEditCancel}
+                onOk={handleEditConfirm}
+                categories={categories}
+                product={selectedProduct}
+            />
+            {/* Form chỉnh sửa sản phẩm */}
 
             {/* Sử dụng AddProductModal */}
             <AddProductModal

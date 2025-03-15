@@ -16,6 +16,7 @@ import { useEffect, useRef, useState } from "react";
 import { getToken, removeToken } from "../../services/localStorageService";
 import { setUserDetails as setUserDetailsAction } from '../../actions/user.js'; // Tạo action setUserDetails
 import { useDispatch } from "react-redux";
+import { persistor } from "../../store.js";
 
 
 
@@ -89,7 +90,9 @@ function LayoutDefault() {
     const handleLogout = () => {
         removeToken();
         setUserDetails(null);
+        persistor.purge();
         setShowDropdown(false);
+        window.location.reload();
     };
 
     const toggleDropdown = () => {

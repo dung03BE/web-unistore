@@ -14,7 +14,7 @@ import { OrderList } from './OrderList';
 import { removeToken } from '../../services/localStorageService';
 import { setUserDetails } from '../../actions/user';
 import { useNavigate } from 'react-router-dom';
-
+import { persistor } from "../../store";
 const { Header, Sider, Content } = Layout;
 
 const Profile = () => {
@@ -45,6 +45,7 @@ const Profile = () => {
     const handleLogout = () => {
         removeToken();
         setUserDetails(null);
+        persistor.purge();
         navigate('/login');
 
     };

@@ -113,3 +113,21 @@ export const deleteAuth = async (path, options) => {
     const result = await response.json();
     return result;
 };
+
+export const patchAuth = async (path, options) => {
+    const accessToken = getAccessToken();
+    const response = await fetch(API_DOMAIN + path, {
+        method: "PATCH",
+        headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(options),
+    });
+    if (response.status === 200) {
+        return { success: true }; // Hoặc trả về một giá trị thành công
+    }
+    const result = await response.json();
+    return result;
+};
