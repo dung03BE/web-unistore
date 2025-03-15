@@ -52,8 +52,10 @@ public class ProductService implements IProductService {
         // Ánh xạ từng `Product` sang `ProductResponse` và bao gồm `ProductImageResponse` nếu có
         List<ProductResponse> productResponses = productPage.getContent().stream()
                 .map(product -> {
+                    ProductDetails productDetails = productDetailsRepository.findByProductId(product.getId());
+                    ProductDetailsResponse productDetailsResponse = productMapper.toProductDetailsResponse(productDetails);
                     ProductResponse productResponse = productMapper.toProductResponse(product);
-
+                    productResponse.setDetails(productDetailsResponse);
                     // Gắn danh sách `ProductImageResponse` vào `ProductResponse` nếu tồn tại
                     if (product.getImages() != null && !product.getImages().isEmpty()) {
                         productResponse.setThumbnails(productMapper.toProductImageResponses(product.getImages()));
@@ -248,6 +250,7 @@ public class ProductService implements IProductService {
         List<Product> productList = productRepository.findAll();
         List<ProductResponse> productResponses = productList.stream()
                 .map(product -> {
+
                     ProductResponse productResponse = productMapper.toProductResponse(product);
                     // Ánh xạ thumbnails từ ProductImage sang ProductImageResponse
                     List<ProductResponse.ProductImageResponse> imageResponses = productMapper.toProductImageResponses(product.getImages());
@@ -263,7 +266,7 @@ public class ProductService implements IProductService {
         Category category = categoryRepository.findById(categoryId).orElseThrow(
                 () -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED)
         );
-        ;
+
 
         // Lấy danh sách `Product` từ repository theo điều kiện lọc
         Page<Product> productPage = productRepository.findAllByCategoryId(categoryId, pageable);
@@ -271,7 +274,10 @@ public class ProductService implements IProductService {
         // Ánh xạ từng `Product` sang `ProductResponse` và bao gồm `ProductImageResponse` nếu có
         List<ProductResponse> productResponses = productPage.getContent().stream()
                 .map(product -> {
+                    ProductDetails productDetails = productDetailsRepository.findByProductId(product.getId());
+                    ProductDetailsResponse productDetailsResponse = productMapper.toProductDetailsResponse(productDetails);
                     ProductResponse productResponse = productMapper.toProductResponse(product);
+                    productResponse.setDetails(productDetailsResponse);
 
                     // Gắn danh sách `ProductImageResponse` vào `ProductResponse` nếu tồn tại
                     if (product.getImages() != null && !product.getImages().isEmpty()) {

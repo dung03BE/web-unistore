@@ -20,6 +20,9 @@ public class ProductResponse {
     private List<ProductImageResponse> thumbnails;
     private ProductDetailsResponse details;
     private List<ProductColorResponse> colors;
+    private String brand;
+    private String model;
+    private Byte available;
     @NoArgsConstructor
     @Getter
     @Setter
