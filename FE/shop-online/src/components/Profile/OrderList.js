@@ -1,7 +1,7 @@
 // OrderList.js
 import React, { useState, useEffect } from 'react';
 import { getOrderByUserId } from '../../services/paymentService';
-import { Collapse } from 'antd';
+import { Collapse, Badge } from 'antd'; // Import Badge
 
 const { Panel } = Collapse;
 
@@ -12,6 +12,7 @@ export const OrderList = () => {
     const [error, setError] = useState(null);
     const [searchKeyword, setSearchKeyword] = useState('');
     const [filterStatus, setFilterStatus] = useState('Tất cả');
+    const [statusCounts, setStatusCounts] = useState({}); // State to store counts
 
     useEffect(() => {
         const fetchOrders = async () => {
@@ -19,7 +20,6 @@ export const OrderList = () => {
                 const response = await getOrderByUserId();
                 if (response) {
                     console.log("Order la:", response);
-                    // Chuyển đổi trạng thái trước khi setOrders
                     const convertedOrders = response.map(order => ({
                         ...order,
                         statusDisplay: convertStatus(order.status)
@@ -41,6 +41,7 @@ export const OrderList = () => {
 
     useEffect(() => {
         filterOrders();
+        updateStatusCounts(); // Update counts when orders change
     }, [orders, searchKeyword, filterStatus]);
 
     const convertStatus = (status) => {
@@ -56,7 +57,7 @@ export const OrderList = () => {
             case 'cancelled':
                 return 'Đã hủy';
             default:
-                return status; // Trả về trạng thái gốc nếu không khớp
+                return status;
         }
     };
 
@@ -84,6 +85,15 @@ export const OrderList = () => {
 
     const handleFilterClick = (status) => {
         setFilterStatus(status);
+    };
+
+    const updateStatusCounts = () => {
+        const counts = orders.reduce((acc, order) => {
+            const status = order.statusDisplay;
+            acc[status] = (acc[status] || 0) + 1;
+            return acc;
+        }, {});
+        setStatusCounts(counts);
     };
 
     if (loading) {
@@ -124,6 +134,9 @@ export const OrderList = () => {
                         }}
                     >
                         {status}
+                        {statusCounts[status] > 0 && status !== 'Tất cả' && (
+                            <Badge count={statusCounts[status]} style={{ marginLeft: '5px' }} />
+                        )}
                     </button>
                 ))}
             </div>
