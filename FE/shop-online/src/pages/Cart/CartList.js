@@ -3,14 +3,13 @@ import "./CartItem.scss";
 import CartItem from "./CartItem";
 import { deleteAll, fetchCart } from "../../actions/cart";
 import { useEffect } from "react";
-import Payment from "../../components/Payment/Payment";
 import { Link } from "react-router-dom";
 import { DeleteAllCartApi } from "../../services/cartService";
 
 function CartList() {
     const cart = useSelector((state) => state.cartReducer.cart); // Lấy cart từ state.cartReducer.cart
     const dispatch = useDispatch();
-    const userId = useSelector((state) => state.userReducer.userDetails?.id);
+    // const userId = useSelector((state) => state.userReducer.userDetails?.id);
     useEffect(() => {
         dispatch(fetchCart());
     }, [dispatch]);

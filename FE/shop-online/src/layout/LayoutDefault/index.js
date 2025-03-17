@@ -3,7 +3,7 @@ import "./LayoutDefault.scss";
 import CartMini from "../../components/CartMini";
 import logo from '../../images/Logo.png';
 import bct from '../../images/bct.svg';
-import { UserOutlined } from '@ant-design/icons';
+import { RestOutlined, SyncOutlined, UserOutlined } from '@ant-design/icons';
 import {
     faUser, faMagnifyingGlass, faCartShopping,
     faLocationDot, faPhone, faEnvelope, faSignOutAlt, faCog, faUserCircle
@@ -183,6 +183,10 @@ function LayoutDefault() {
                     <div className="layout-default__cart">
                         <FontAwesomeIcon icon={faCartShopping} />
                         <CartMini />
+                    </div>
+                    <div className="layout-default__recyling">
+                        <SyncOutlined />
+                        Điện thoại xanh
                     </div>
                     <a
                         href="javascript:;"
