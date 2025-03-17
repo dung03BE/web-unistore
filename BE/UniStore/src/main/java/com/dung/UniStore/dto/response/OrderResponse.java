@@ -14,7 +14,7 @@ import java.util.List;
 @Setter
 @Data
 public class OrderResponse {
-
+    private int id;
     @JsonProperty("user_id")
     private int userId;
     @JsonProperty("fullname")

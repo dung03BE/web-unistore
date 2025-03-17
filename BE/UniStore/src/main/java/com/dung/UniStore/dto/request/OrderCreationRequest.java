@@ -1,5 +1,6 @@
 package com.dung.UniStore.dto.request;
 
+import com.dung.UniStore.entity.Status;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -30,4 +31,5 @@ public class OrderCreationRequest {
     private String shippingAddress;
     private LocalDate shippingDate;
     private String paymentMethod;
+    private Status status;
 }

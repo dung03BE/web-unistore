@@ -124,6 +124,15 @@ public class OrderService implements IOrderService{
         return orderResponses;
     }
 
+    @Override
+    public OrderResponse updateStatusOrder(int id, OrderCreationRequest request) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(()-> new AppException(ErrorCode.ORDER_NOT_EXISTS));
+        order.setStatus(request.getStatus());
+        orderRepository.save(order);
+        return orderMapper.toOrderResponse(order);
+    }
+
     public void deleteCartAndItems(Long cartId) {
         Cart cart = cartRepository.findById(cartId)
                 .orElseThrow(() -> new RuntimeException("Cart not found!"));

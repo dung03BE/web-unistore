@@ -21,6 +21,7 @@ import java.util.List;
 public class OrderController {
     private final IOrderService orderService;
     private final AuthUtil authUtil;
+
     @GetMapping
     public ApiResponse<List<OrderResponse>> getAllOrders(OrderFilterForm form) {
         return ApiResponse.<List<OrderResponse>>builder()
@@ -51,7 +52,7 @@ public class OrderController {
 //        return modelMapper.map(orderService.getOrderById(id),OrderDTO.class);
 //    }
     @GetMapping("/user")
-    public ApiResponse<List<OrderResponse>> getOrderByUserId()  {
+    public ApiResponse<List<OrderResponse>> getOrderByUserId() {
         Long userId = authUtil.loggedInUserId();
         List<OrderResponse> orders = orderService.getOrderByUserId(Math.toIntExact(userId));
         return ApiResponse.<List<OrderResponse>>builder()
@@ -66,5 +67,14 @@ public class OrderController {
                 .result(orderService.checkout(request))
                 .build();
 
+    }
+
+    @PutMapping("/checkout/{id}")
+    public ApiResponse<OrderResponse> updateStatusOrder(@PathVariable int id,
+                                                        @RequestBody OrderCreationRequest
+                                                                request) {
+        return ApiResponse.<OrderResponse>builder()
+                .result(orderService.updateStatusOrder(id,request))
+                .build();
     }
 }

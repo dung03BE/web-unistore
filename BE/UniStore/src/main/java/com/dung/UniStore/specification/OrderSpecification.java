@@ -52,7 +52,7 @@ public class OrderSpecification {
                     return criteriaBuilder.like(root.get(SEARCH_FULL_NAME), "%" + value + "%");
                 case TOTAL_MONEY:
                     if (value instanceof Number) {
-                        return criteriaBuilder.greaterThanOrEqualTo(root.get(TOTAL_MONEY),value.toString());
+                        return criteriaBuilder.equal(root.get(TOTAL_MONEY),value.toString());
                     }
                     break;
                 case ACTIVE:
