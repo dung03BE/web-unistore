@@ -6,14 +6,15 @@ import { Button } from "../ChatSocket/button";
 import { useSelector } from 'react-redux';
 import "../ChatSocket/ChatRoom.scss";
 import GuiComment from './GuiComment';
-const ChatRoom = ({ initialComments }) => {
+const ChatRoom = ({ initialComments, productId }) => {
     const userDetails = useSelector(state => state.userReducer.userDetails); // Lấy userDetails từ Redux store
     const fullName = userDetails?.fullName || 'Guest'; // Lấy fullName hoặc 'Guest' nếu không có
+    const isAdmin = userDetails?.role === "ADMIN";
     const [messages, setMessages] = useState(initialComments || []);
     const [newMessage, setNewMessage] = useState('');
     const [stompClient, setStompClient] = useState(null);
     const [connected, setConnected] = useState(false);
-
+    const [replyMessage, setReplyMessage] = useState({});
     useEffect(() => {
         const client = new Client({
             webSocketFactory: () => new SockJS('http://localhost:8081/ws-chat'),
@@ -50,7 +51,8 @@ const ChatRoom = ({ initialComments }) => {
             body: JSON.stringify({
                 content: newMessage,
                 sender: fullName, // Sử dụng fullName từ Redux store
-                type: 'CHAT'
+                type: 'CHAT',
+                productId: productId
             })
         });
 

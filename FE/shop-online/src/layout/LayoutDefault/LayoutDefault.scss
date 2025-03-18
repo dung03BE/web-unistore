@@ -126,7 +126,27 @@
         }
 
     }
-
+    &__recyling {
+      a {
+        margin-left: 10px;
+        text-decoration: none;
+        color: black;
+        transition: color 0.3s ease;
+        
+        &:hover {
+          color: red;
+        }
+      }
+    
+      .title__recycling {
+        margin-left: 10px;
+        transition: color 0.3s ease;
+    
+        &:hover {
+          color: red;
+        }
+      }
+    }
     &__address {
         display: flex;
         align-items: center;
@@ -165,7 +185,6 @@
         gap: 40px;
         justify-items: start;   
         max-height: 250px;
-
     }
     &__infor {
         h4 {

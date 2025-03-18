@@ -8,6 +8,7 @@ import ProductList from "../admin/ProductList";
 import StaffManagement from "../admin/StaffManagement";
 import SystemSettings from "../admin/SystemSettings";
 import VoucherManagement from "../admin/VoucherManagement";
+import GreenPhone from "../components/GreenPhone/GreenPhone";
 import Login from "../components/Login";
 import Payment from "../components/Payment/Payment";
 import ProductDetails from "../components/product/ProductDetail ";
@@ -104,6 +105,10 @@ export const router = [
                 path: "/register", // Thêm định tuyến cho register
                 element: <Register />
             },
+            {
+                path: "/recycling", // Thêm định tuyến cho register
+                element: <GreenPhone />
+            }
         ]
     },
     {

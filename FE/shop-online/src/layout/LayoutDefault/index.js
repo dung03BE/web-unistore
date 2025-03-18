@@ -17,6 +17,7 @@ import { getToken, removeToken } from "../../services/localStorageService";
 import { setUserDetails as setUserDetailsAction } from '../../actions/user.js'; // Tạo action setUserDetails
 import { useDispatch } from "react-redux";
 import { persistor } from "../../store.js";
+import GreenPhone from "../../components/GreenPhone/GreenPhone.js";
 
 
 
@@ -185,8 +186,12 @@ function LayoutDefault() {
                         <CartMini />
                     </div>
                     <div className="layout-default__recyling">
-                        <SyncOutlined />
-                        Điện thoại xanh
+                        <NavLink to="/recycling">
+                            <SyncOutlined />
+                            <span className="title__recycling">
+                                Điện thoại xanh
+                            </span>
+                        </NavLink>
                     </div>
                     <a
                         href="javascript:;"
@@ -194,7 +199,7 @@ function LayoutDefault() {
                         onClick={handleOpenLocation}
                     >
                         <i className="icon-location"></i>
-                        <span data-province="3" data-district="25" data-ward="10238">
+                        <span data-province="3" data-district="25" data-ward="10238" style={{ marginLeft: '10px' }}>
                             <FontAwesomeIcon icon={faLocationDot} />
                             Phường 12, P.12, Q.10, Hồ Chí Minh
                         </span>

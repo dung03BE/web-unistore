@@ -26,7 +26,7 @@ function ProductDetails({ products }) {
     const [fourthImage, setFourthImage] = useState(null);
     const [comments, setComments] = useState([]);
     const [showComments, setShowComments] = useState(false); // Thêm state để kiểm soát hiển thị comment
-
+    console.log("PRODUCT:" + products);
     const offers = [
         {
             id: 1,
@@ -54,6 +54,7 @@ function ProductDetails({ products }) {
         const fetchProduct = async () => {
             try {
                 const data = await getProductById(id);
+                console.log("IDproduct:" + id);
                 if (data) {
                     setProduct(data);
                     setMainImage(`http://localhost:8081/uploads/${data.thumbnails?.[0]?.imageUrl || DEFAULT_IMAGE}`);
@@ -72,6 +73,7 @@ function ProductDetails({ products }) {
                 const fetchComments = async () => {
                     try {
                         const response = await fetch(`http://localhost:8081/api/v1/comments/${id}`);
+
                         if (!response.ok) {
                             throw new Error(`HTTP error! status: ${response.status}`);
                         }
@@ -285,7 +287,7 @@ function ProductDetails({ products }) {
                 <button onClick={toggleComments}>
                     {showComments ? "Ẩn bình luận" : "Xem bình luận"}
                 </button>
-                {showComments && <ChatRoom initialComments={comments} />}
+                {showComments && <ChatRoom initialComments={comments} productId={id} />}
             </div>
         </>
     );

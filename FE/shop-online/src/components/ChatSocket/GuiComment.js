@@ -3,7 +3,7 @@ import { AntDesignOutlined } from '@ant-design/icons';
 import { Button, ConfigProvider, Space } from 'antd';
 import { createStyles } from 'antd-style';
 const useStyle = createStyles(({ prefixCls, css }) => ({
-    linearGradientButton: css`
+  linearGradientButton: css`
     &.${prefixCls}-btn-primary:not([disabled]):not(.${prefixCls}-btn-dangerous) {
       > span {
         position: relative;
@@ -26,20 +26,20 @@ const useStyle = createStyles(({ prefixCls, css }) => ({
   `,
 }));
 const GuiComment = () => {
-    const { styles } = useStyle();
-    return (
-        <ConfigProvider
-            button={{
-                className: styles.linearGradientButton,
-            }}
-        >
-            <Space>
-                <Button type="primary" size="large" icon={<AntDesignOutlined />}>
+  const { styles } = useStyle();
+  return (
+    <ConfigProvider
+      button={{
+        className: styles.linearGradientButton,
+      }}
+    >
+      <Space>
+        {/* <Button type="primary" size="large" icon={<AntDesignOutlined />}>
                     Gửi thêm bình luận:
-                </Button>
+                </Button> */}
 
-            </Space>
-        </ConfigProvider>
-    );
+      </Space>
+    </ConfigProvider>
+  );
 };
 export default GuiComment;
