@@ -20,7 +20,7 @@ public class ChatController {
     public ChatMessage sendMessage(@Payload ChatMessage chatMessage) {
         if (chatMessage.getType() == ChatMessage.MessageType.CHAT) {
             Comment comment = new Comment();
-            comment.setProductId(1L); // Thay bằng productId thực tế
+            comment.setProductId(chatMessage.getProductId()); // Thay bằng productId thực tế
             comment.setUsername(chatMessage.getSender());
             comment.setContent(chatMessage.getContent());
             comment.setTimestamp(LocalDateTime.now());
