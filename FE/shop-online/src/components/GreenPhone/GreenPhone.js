@@ -1,20 +1,28 @@
 import React from 'react';
-import { Carousel, Typography, Card, Steps, Button, Collapse, Divider, List, Form, Input, message } from 'antd';
+import { Carousel, Typography, Card, Steps, Button, Collapse, Divider, List, Form, Input, message, Select, Modal, Space } from 'antd';
 import "../GreenPhone/GreenPhone.scss";
 import thugom from '../../images/thugom.png';
 import vntaiche from '../../images/vntaiche.jpg';
-import { DatabaseTwoTone, HomeTwoTone, ShopTwoTone } from '@ant-design/icons';
+import { CheckCircleOutlined, DatabaseTwoTone, HomeTwoTone, MobileOutlined, ShopTwoTone } from '@ant-design/icons';
 import banner1 from '../../images/banner1.jpg';
 import banner2 from '../../images/banner2.jpg';
 import banner3 from '../../images/banner3.jpg';
 import vnTC from '../../images/vnTC.png';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { createRecycleRequest } from '../../services/recycleService';
 const { Title, Paragraph, Text } = Typography;
 const { Step } = Steps;
 const { Panel } = Collapse;
 
 function GreenPhone() {
+    const [isModalVisible, setIsModalVisible] = React.useState(false);
+    const [deviceType, setDeviceType] = React.useState('');
+    const [deviceCondition, setDeviceCondition] = React.useState('');
+    const [pickupMethod, setPickupMethod] = React.useState('');
     const [currentStep, setCurrentStep] = React.useState(0);
     const [form] = Form.useForm();
+    const [requestId, setRequestId] = React.useState(null); // Thêm state để lưu trữ ID request
+    const navigate = useNavigate(); // Khởi tạo useNavigate
     const sliderImages = [
         banner1,
         banner2,
@@ -54,12 +62,39 @@ function GreenPhone() {
     const prevStep = () => {
         setCurrentStep(currentStep - 1);
     };
-
-    const handleFormSubmit = (values) => {
-        console.log('Form values:', values);
-        message.success('Đăng ký thu gom thành công!');
+    const showModal = () => {
+        setIsModalVisible(true);
     };
 
+    const handleCancel = () => {
+        setIsModalVisible(false);
+    };
+    const handleModalSubmit = async () => {
+        console.log('Modal values:', { deviceType, deviceCondition, pickupMethod });
+        const requestData = {
+            deviceType: deviceType,
+            deviceCondition: deviceCondition,
+            pickupMethod: pickupMethod,
+        };
+        console.log("Request data:", requestData);
+        try {
+            const result = await createRecycleRequest(requestData);
+            if (result) {
+                message.success('Yêu cầu thu gom đã được gửi! Hãy theo dõi tiến trình để nhận biết kết quả');
+                setIsModalVisible(false);
+                setRequestId(result.result.id); // Lưu ID request để điều hướng
+            }
+        }
+        catch (error) {
+            message.error('Có lỗi xảy ra khi gửi yêu cầu!');
+        }
+        form.resetFields();
+    };
+
+    const handleViewProgress = () => {
+        console.log('View progress:', requestId);
+        navigate(`/progress/${requestId}`); // Điều hướng đến trang tiến trình
+    };
     return (
         <div style={{ padding: '20px' }}>
             <div className='slider'>
@@ -110,14 +145,14 @@ function GreenPhone() {
             <Title level={3}>1️⃣ Giới thiệu về tái chế điện thoại</Title>
             <Collapse>
                 <Panel header="Tại sao nên tái chế?" key="1">
-                    <Paragraph>Giảm ô nhiễm môi trường, hạn chế rác thải điện tử.</Paragraph>
-                    <Paragraph>Tận dụng tài nguyên từ thiết bị cũ, giảm khai thác nguyên liệu mới.</Paragraph>
-                    <Paragraph>Đóng góp vào nền kinh tế tuần hoàn.</Paragraph>
+                    <Paragraph style={{ fontSize: '18px' }} >Giảm ô nhiễm môi trường, hạn chế rác thải điện tử.</Paragraph>
+                    <Paragraph style={{ fontSize: '18px' }} >Tận dụng tài nguyên từ thiết bị cũ, giảm khai thác nguyên liệu mới.</Paragraph>
+                    <Paragraph style={{ fontSize: '18px' }} >Đóng góp vào nền kinh tế tuần hoàn.</Paragraph>
                 </Panel>
                 <Panel header="Lợi ích môi trường & kinh tế" key="2">
-                    <Paragraph>Giảm khí thải độc hại từ rác điện tử.</Paragraph>
-                    <Paragraph>Tiết kiệm chi phí sản xuất nhờ tái sử dụng linh kiện.</Paragraph>
-                    <Paragraph>Khuyến khích khách hàng tham gia bảo vệ môi trường.</Paragraph>
+                    <Paragraph style={{ fontSize: '18px' }} >Giảm khí thải độc hại từ rác điện tử.</Paragraph>
+                    <Paragraph style={{ fontSize: '18px' }} >Tiết kiệm chi phí sản xuất nhờ tái sử dụng linh kiện.</Paragraph>
+                    <Paragraph style={{ fontSize: '18px' }} >Khuyến khích khách hàng tham gia bảo vệ môi trường.</Paragraph>
                 </Panel>
             </Collapse>
 
@@ -170,13 +205,13 @@ function GreenPhone() {
             <Title level={3}>4️⃣ Chính sách thu mua & định giá</Title>
             <Collapse>
                 <Panel header="Nguyên tắc thu mua" key="3">
-                    <Paragraph>Điện thoại còn dùng được → Giá cao hơn, có thể bán lại.</Paragraph>
-                    <Paragraph>Điện thoại hỏng nhưng có thể sửa → Giá thấp hơn.</Paragraph>
-                    <Paragraph>Điện thoại hỏng hoàn toàn → Mua giá rẻ hoặc thu miễn phí để lấy linh kiện.</Paragraph>
+                    <Paragraph style={{ fontSize: '18px' }} >Điện thoại còn dùng được → Giá cao hơn, có thể bán lại.</Paragraph>
+                    <Paragraph style={{ fontSize: '18px' }}>Điện thoại hỏng nhưng có thể sửa → Giá thấp hơn.</Paragraph>
+                    <Paragraph style={{ fontSize: '18px' }}>Điện thoại hỏng hoàn toàn → Mua giá rẻ hoặc thu miễn phí để lấy linh kiện.</Paragraph>
                 </Panel>
                 <Panel header="Ưu đãi cho khách hàng" key="4">
-                    <Paragraph>Hỗ trợ giảm giá khi mua điện thoại mới nếu đổi điện thoại cũ.</Paragraph>
-                    <Paragraph>Chính sách hoàn tiền nếu điện thoại thu mua không sửa được.</Paragraph>
+                    <Paragraph style={{ fontSize: '18px' }}>Hỗ trợ giảm giá khi mua điện thoại mới nếu đổi điện thoại cũ.</Paragraph>
+                    <Paragraph style={{ fontSize: '18px' }}>Chính sách hoàn tiền nếu điện thoại thu mua không sửa được.</Paragraph>
                 </Panel>
             </Collapse>
 
@@ -218,11 +253,102 @@ function GreenPhone() {
 
             <Divider />
             <Title level={3}> 6️⃣ Form đăng ký thu gom điện thoại</Title>
-            <Form form={form} layout="vertical" onFinish={handleFormSubmit}>
-                <Button type="primary" htmlType="submit" style={{ marginLeft: '40px', backgroundColor: '#8CC63E' }}>
-                    Đăng ký thu gom
+
+            <Button type="primary" htmlType="button" onClick={showModal} style={{ marginLeft: '40px', backgroundColor: '#8CC63E' }}>
+                Đăng ký thu gom
+            </Button>
+            {requestId && ( // Hiển thị nút "Xem tiến trình" khi requestId có giá trị
+                <Button
+                    type="primary"
+                    onClick={handleViewProgress}
+                    style={{ marginLeft: '10px' }}
+                >
+                    Xem tiến trình
                 </Button>
-            </Form>
+            )}
+            <Modal
+                title={
+                    <Space>
+                        <MobileOutlined style={{ fontSize: '20px', color: '#1890ff' }} />
+                        <Title level={4} style={{ margin: 0 }}>Đăng ký thu gom điện thoại</Title>
+                    </Space>
+                }
+                visible={isModalVisible}
+                onCancel={handleCancel}
+                footer={null}
+                width={450}
+                bodyStyle={{ padding: '20px' }}
+                centered
+            >
+                <Text type="secondary" style={{ display: 'block', marginBottom: '20px' }}>
+                    Vui lòng điền thông tin để đăng ký thu gom thiết bị điện thoại cũ của bạn.
+                </Text>
+
+                <Form layout="vertical" onFinish={handleModalSubmit}>
+                    <Form.Item
+                        label={<Text strong>Loại thiết bị</Text>}
+                        style={{ marginBottom: '16px' }}
+                    >
+                        <Input
+                            value={deviceType}
+                            onChange={(e) => setDeviceType(e.target.value)}
+                            placeholder="Nhập loại thiết bị của bạn"
+                            style={{ borderRadius: '6px' }}
+                        />
+                    </Form.Item>
+
+                    <Form.Item
+                        label={<Text strong>Tình trạng thiết bị</Text>}
+                        style={{ marginBottom: '16px' }}
+                    >
+                        <Input
+                            value={deviceCondition}
+                            onChange={(e) => setDeviceCondition(e.target.value)}
+                            placeholder="Mô tả tình trạng thiết bị"
+                            style={{ borderRadius: '6px' }}
+                        />
+                    </Form.Item>
+
+                    <Form.Item
+                        label={<Text strong>Phương thức nhận</Text>}
+                        style={{ marginBottom: '24px' }}
+                    >
+                        <Select
+                            value={pickupMethod}
+                            onChange={(value) => setPickupMethod(value)}
+                            style={{ width: '100%', borderRadius: '6px' }}
+                        >
+                            <Select.Option value="Cửa hàng">Cửa hàng</Select.Option>
+                            <Select.Option value="Tại nhà">Tại nhà</Select.Option>
+                            <Select.Option value="Bưu điện">Bưu điện</Select.Option>
+                        </Select>
+                    </Form.Item>
+
+                    <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
+                        <Space>
+                            <Button
+                                onClick={handleCancel}
+                                style={{ borderRadius: '6px' }}
+                            >
+                                Hủy bỏ
+                            </Button>
+                            <Button
+                                type="primary"
+                                htmlType="submit"
+                                icon={<CheckCircleOutlined />}
+                                style={{
+                                    borderRadius: '6px',
+                                    background: '#1890ff',
+                                    boxShadow: '0 2px 0 rgba(0, 0, 0, 0.045)'
+                                }}
+                            >
+                                Gửi yêu cầu
+                            </Button>
+
+                        </Space>
+                    </Form.Item>
+                </Form>
+            </Modal>
             <Title level={3}>7️⃣ Ưu Đãi Cho Khách Hàng Khi Tham Gia Tái Chế</Title>
             <Paragraph style={{ fontSize: '18px' }}>Chương trình ưu đãi đặc biệt:</Paragraph>
             <List
