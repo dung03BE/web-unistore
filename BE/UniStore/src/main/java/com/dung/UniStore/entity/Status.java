@@ -1,5 +1,5 @@
 package com.dung.UniStore.entity;
 
 public enum Status {
-    pending,processing,shipped,delivered,cancelled
+    pending,processing,shipped,delivered,cancelled,active,used,expired
 }
