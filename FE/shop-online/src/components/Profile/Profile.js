@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
     MenuFoldOutlined,
     MenuUnfoldOutlined,
+    SyncOutlined,
     UploadOutlined,
     UsergroupAddOutlined,
     UserOutlined,
@@ -15,6 +16,7 @@ import { removeToken } from '../../services/localStorageService';
 import { setUserDetails } from '../../actions/user';
 import { useNavigate } from 'react-router-dom';
 import { persistor } from "../../store";
+import RecycleCondition from './RecycleCondition';
 const { Header, Sider, Content } = Layout;
 
 const Profile = () => {
@@ -27,7 +29,7 @@ const Profile = () => {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
     const handleMenuClick = ({ key }) => {
-        if (key === '4') {
+        if (key === '5') {
             handleLogout();
         } else {
             setSelectedMenu(key);
@@ -40,7 +42,7 @@ const Profile = () => {
         console.log("Đã chạy vào đây");
         contentToRender = <OrderList />;
     } else {
-        contentToRender = <div>Nội dung khác</div>;
+        contentToRender = <RecycleCondition />;
     }
     const handleLogout = () => {
         removeToken();
@@ -87,6 +89,11 @@ const Profile = () => {
                         },
                         {
                             key: '4',
+                            icon: <SyncOutlined />,
+                            label: 'Trạng thái tái chế',
+                        },
+                        {
+                            key: '5',
                             icon: <UploadOutlined />,
                             label: 'Đăng xuất',
                         }

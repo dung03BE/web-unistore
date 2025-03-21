@@ -9,6 +9,7 @@ import {
     GiftOutlined,
     SettingOutlined,
     UploadOutlined,
+    SyncOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { setUserDetails } from '../actions/user';
@@ -52,6 +53,11 @@ const menuItems = [
         key: 'staff',
         icon: <TeamOutlined />,
         label: 'Quản lý nhân viên',
+    },
+    {
+        key: 'recycle',
+        icon: <SyncOutlined />,
+        label: 'Quản lý yêu cầu tái chế',
     },
     {
         key: 'promotions',
@@ -131,6 +137,9 @@ const LayoutAdmin = () => {
             case 'staff':
                 path = '/admin/staff';
                 break;
+            case 'recycle':
+                path = '/admin/recycle';
+                break;
             case 'promotions-list':
                 path = '/admin/promotions/list';
                 break;
@@ -163,7 +172,7 @@ const LayoutAdmin = () => {
                     top: 0,
                     bottom: 0,
                 }}
-                width={280}
+                width={300}
             >
                 <div className="demo-logo-vertical" style={{ height: 32, margin: 16, background: 'rgba(255, 255, 255, 0.2)' }} />
                 <Menu

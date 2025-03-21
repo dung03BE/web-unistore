@@ -5,9 +5,11 @@ import LayoutAdmin from "../admin/LayoutAdmin";
 import OrderManageMent from "../admin/OrderManagement";
 import ProductCategories from "../admin/ProductCategories";
 import ProductList from "../admin/ProductList";
+import RecycleManagement from "../admin/RecycleManagement";
 import StaffManagement from "../admin/StaffManagement";
 import SystemSettings from "../admin/SystemSettings";
 import VoucherManagement from "../admin/VoucherManagement";
+import Announce from "../components/Announce/Announce";
 import GreenPhone from "../components/GreenPhone/GreenPhone";
 import Login from "../components/Login";
 import Payment from "../components/Payment/Payment";
@@ -52,6 +54,10 @@ export const adminRoutes = {
                 {
                     path: "staff",
                     element: <StaffManagement />,
+                },
+                {
+                    path: "recycle",
+                    element: <RecycleManagement />,
                 },
                 {
                     path: "promotions/list",
@@ -108,6 +114,10 @@ export const router = [
             {
                 path: "/recycling", // Thêm định tuyến cho register
                 element: <GreenPhone />
+            },
+            {
+                path: "/announce", // Thêm định tuyến cho register
+                element: <Announce />
             }
         ]
     },

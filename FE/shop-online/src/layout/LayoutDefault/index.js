@@ -3,7 +3,7 @@ import "./LayoutDefault.scss";
 import CartMini from "../../components/CartMini";
 import logo from '../../images/Logo.png';
 import bct from '../../images/bct.svg';
-import { RestOutlined, SyncOutlined, UserOutlined } from '@ant-design/icons';
+import { BellOutlined, RestOutlined, SyncOutlined, UserOutlined } from '@ant-design/icons';
 import {
     faUser, faMagnifyingGlass, faCartShopping,
     faLocationDot, faPhone, faEnvelope, faSignOutAlt, faCog, faUserCircle
@@ -18,6 +18,7 @@ import { setUserDetails as setUserDetailsAction } from '../../actions/user.js'; 
 import { useDispatch } from "react-redux";
 import { persistor } from "../../store.js";
 import GreenPhone from "../../components/GreenPhone/GreenPhone.js";
+import { getAnnounceByUserId, updateStatusAnnounceByUseId } from "../../services/announceService.js";
 
 
 
@@ -34,6 +35,8 @@ function LayoutDefault() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [searchQuery, setSearchQuery] = useState('');
+    const [showNotifications, setShowNotifications] = useState(false); // State hiển thị thông báo
+    const [announcements, setAnnouncements] = useState([]); // State lưu trữ thông báo
     useEffect(() => {
         const accessToken = getToken();
 
@@ -75,6 +78,17 @@ function LayoutDefault() {
         };
 
         getUserDetails();
+        // api thong báo
+        const fetchAnnouncements = async () => {
+            try {
+                const data = await getAnnounceByUserId();
+                setAnnouncements(data);
+                console.log("Thông báo:", data);
+            } catch (error) {
+                console.error("Lỗi khi lấy thông báo:", error);
+            }
+        };
+        fetchAnnouncements();
 
         function handleClickOutside(event) {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -100,6 +114,25 @@ function LayoutDefault() {
         setShowDropdown(!showDropdown);
     };
 
+
+    const toggleNotifications = async () => {
+        if (!showNotifications) {
+            try {
+                await updateStatusAnnounceByUseId();
+
+                setAnnouncements(prevAnnouncements =>
+                    prevAnnouncements.map(announcement => ({
+                        ...announcement,
+                        isRead: true,
+                    }))
+                );
+            } catch (error) {
+                console.error("Lỗi khi cập nhật trạng thái thông báo:", error);
+
+            }
+        }
+        setShowNotifications(!showNotifications);
+    };
     // Hiển thị loader trong khi đang kiểm tra đăng nhập
     if (isLoading) {
         return <div className="layout-loading">Đang tải...</div>;
@@ -112,6 +145,21 @@ function LayoutDefault() {
             navigate("/");
         }
     };
+
+    const NotificationDropdown = () => (
+        <div className="notification-dropdown">
+            {announcements.map((announcement) => (
+                <div key={announcement.id} className={`notification-item ${!announcement.isRead ? 'unread' : ''}`}>
+                    <h2>{announcement.title}</h2>
+                    <p>{announcement.content}</p>
+                    <p> {announcement.createdAt}</p>
+                </div>
+            ))}
+        </div>
+    );
+
+    const unreadCount = announcements.filter(announcement => !announcement.isRead).length;
+
     return (
         <>
             <div className="layout-default">
@@ -154,7 +202,9 @@ function LayoutDefault() {
                                 <div className="user-profile-button" onClick={toggleDropdown}>
                                     <FontAwesomeIcon icon={faUserCircle} />
                                     <span>{userDetails.fullName}</span>
+
                                 </div>
+
                                 {showDropdown && (
                                     <div className="dropdown-menu">
                                         <NavLink to="/profile" onClick={() => setShowDropdown(false)}>
@@ -172,6 +222,7 @@ function LayoutDefault() {
                                     </div>
                                 )}
                             </div>
+
                         ) : (
                             // User chưa đăng nhập - hiển thị nút login
                             <NavLink to="/login" className="name-order active">
@@ -179,6 +230,7 @@ function LayoutDefault() {
                                 <span>Đăng nhập</span>
                             </NavLink>
                         )}
+
                     </div>
 
                     <div className="layout-default__cart">
@@ -193,17 +245,13 @@ function LayoutDefault() {
                             </span>
                         </NavLink>
                     </div>
-                    <a
-                        href="javascript:;"
-                        className="layout-default__address"
-                        onClick={handleOpenLocation}
-                    >
-                        <i className="icon-location"></i>
-                        <span data-province="3" data-district="25" data-ward="10238" style={{ marginLeft: '10px' }}>
-                            <FontAwesomeIcon icon={faLocationDot} />
-                            Phường 12, P.12, Q.10, Hồ Chí Minh
-                        </span>
-                    </a>
+                    <div className="layout-default__announce">
+                        <BellOutlined onClick={toggleNotifications} />
+
+                        {unreadCount > 0 && <span className="unread-count">{unreadCount}</span>}
+                        {showNotifications && <NotificationDropdown />}
+                    </div>
+
                 </header>
                 <main className="layout-default__main">
                     <Outlet />

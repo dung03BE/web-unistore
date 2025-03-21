@@ -14,9 +14,14 @@ export const getProductList = async (page = 0, size = 8, minPrice, maxPrice, sea
     if (search && search.trim() !== "") {
         url += `&search=${encodeURIComponent(search)}`;
     }
-
-    const result = await get(url);
-    return result.result;
+    try {
+        const result = await get(url);
+        return result.result;
+    }
+    catch (error) {
+        console.error("Lỗi khi lấy dữ liệu", error);
+        throw error;
+    }
 };
 export const getProductListByCategoryId = async (page = 0, size = 8, categoryId) => {
     let url = `products/getAllBy-category/${categoryId}?page=${page}&size=${size}`;

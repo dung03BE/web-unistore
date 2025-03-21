@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Carousel, Typography, Card, Steps, Button, Collapse, Divider, List, Form, Input, message, Select, Modal, Space } from 'antd';
 import "../GreenPhone/GreenPhone.scss";
 import thugom from '../../images/thugom.png';
@@ -10,6 +10,9 @@ import banner3 from '../../images/banner3.jpg';
 import vnTC from '../../images/vnTC.png';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { createRecycleRequest } from '../../services/recycleService';
+import { Upload } from 'antd'; // Thêm import này
+import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
+import { getToken } from '../../services/localStorageService';
 const { Title, Paragraph, Text } = Typography;
 const { Step } = Steps;
 const { Panel } = Collapse;
@@ -23,6 +26,9 @@ function GreenPhone() {
     const [form] = Form.useForm();
     const [requestId, setRequestId] = React.useState(null); // Thêm state để lưu trữ ID request
     const navigate = useNavigate(); // Khởi tạo useNavigate
+    //upload image 
+    const [imageUrl, setImageUrl] = useState(null); // Thêm state này
+    const [loadingUpload, setLoadingUpload] = useState(false); // Thêm state này
     const sliderImages = [
         banner1,
         banner2,
@@ -38,9 +44,9 @@ function GreenPhone() {
             title: 'Xử lý theo từng loại',
             content: (
                 <>
-                    <Paragraph>Điện thoại còn dùng tốt → Tân trang và bán lại.</Paragraph>
-                    <Paragraph>Điện thoại hỏng nhưng sửa được → Sửa chữa, thay linh kiện.</Paragraph>
-                    <Paragraph>Điện thoại hỏng hoàn toàn → Tháo linh kiện hữu ích, phần còn lại gửi đi tái chế.</Paragraph>
+                    <Paragraph style={{ fontSize: '18px', textAlign: 'justify' }}>Điện thoại còn dùng tốt → Tân trang và bán lại.</Paragraph>
+                    <Paragraph style={{ fontSize: '18px', textAlign: 'justify' }} >Điện thoại hỏng nhưng sửa được → Sửa chữa, thay linh kiện.</Paragraph>
+                    <Paragraph style={{ fontSize: '18px', textAlign: 'justify' }} >Điện thoại hỏng hoàn toàn → Tháo linh kiện hữu ích, phần còn lại gửi đi tái chế.</Paragraph>
                 </>
             ),
         },
@@ -48,8 +54,8 @@ function GreenPhone() {
             title: 'Bán lại & Tái chế',
             content: (
                 <>
-                    <Paragraph>Các thiết bị sửa xong sẽ được bảo hành và bán lại.</Paragraph>
-                    <Paragraph>Linh kiện hỏng sẽ được chuyển đến đơn vị tái chế chuyên nghiệp.</Paragraph>
+                    <Paragraph style={{ fontSize: '18px', textAlign: 'justify' }}>Các thiết bị sửa xong sẽ được bảo hành và bán lại.</Paragraph>
+                    <Paragraph style={{ fontSize: '18px', textAlign: 'justify' }}>Linh kiện hỏng sẽ được chuyển đến đơn vị tái chế chuyên nghiệp.</Paragraph>
                 </>
             ),
         },
@@ -62,10 +68,24 @@ function GreenPhone() {
     const prevStep = () => {
         setCurrentStep(currentStep - 1);
     };
-    const showModal = () => {
-        setIsModalVisible(true);
+    const isLoggedIn = () => {
+        const token = getToken();
+        if (token) {
+            return true;
+        }
+        return false;
     };
+    const showModal = () => {
+        if (isLoggedIn()) {
+            setIsModalVisible(true);
+        } else {
+            message.warning('Vui lòng đăng nhập để đăng ký thu gom hoặc điền từ Google Form!');
 
+        }
+    };
+    const openGoogleForm = () => {
+        window.open('https://www.facebook.com/hoahocthatdongian/posts/1066908996757911/', '_blank'); // Thay thế YOUR_GOOGLE_FORM_URL bằng URL form Google của bạn
+    };
     const handleCancel = () => {
         setIsModalVisible(false);
     };
@@ -75,6 +95,7 @@ function GreenPhone() {
             deviceType: deviceType,
             deviceCondition: deviceCondition,
             pickupMethod: pickupMethod,
+            imageUrl: imageUrl,
         };
         console.log("Request data:", requestData);
         try {
@@ -90,11 +111,53 @@ function GreenPhone() {
         }
         form.resetFields();
     };
-
+    const uploadButton = (
+        <div>
+            {loadingUpload ? <LoadingOutlined /> : <PlusOutlined />}
+            <div style={{ marginTop: 8 }}>Upload</div>
+        </div>
+    );
     const handleViewProgress = () => {
         console.log('View progress:', requestId);
         navigate(`/progress/${requestId}`); // Điều hướng đến trang tiến trình
     };
+    // Hàm xử lý upload ảnh
+    const handleUploadChange = (info) => {
+        console.log('Upload response:', info.file.response);
+
+        if (info.file.status === 'uploading') {
+            setLoadingUpload(true);
+            return;
+        }
+        if (info.file.status === 'done') {
+
+            // Lấy URL ảnh từ response
+            setImageUrl(info.file.response.url);
+            setLoadingUpload(false);
+        }
+    };
+    // Hàm custom request để upload ảnh
+    const customUploadRequest = async ({ file, onSuccess, onError }) => {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch('http://localhost:8081/api/upload', { // Thay đổi URL upload nếu cần
+                method: 'POST',
+                body: formData,
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                onSuccess(data);
+            } else {
+                onError();
+            }
+        } catch (error) {
+            onError();
+        }
+    };
+    const imageUrls = `http://localhost:8081/uploads/${imageUrl}`;
     return (
         <div style={{ padding: '20px' }}>
             <div className='slider'>
@@ -191,10 +254,22 @@ function GreenPhone() {
             <Title level={3}>3️⃣ Cách thu gom điện thoại cũ/hỏng</Title>
             <div className='thugom'>
 
-                <div className='thugomLeft'>
-                    <p>Cách 1: Gửi qua bưu điện <DatabaseTwoTone />– Khách tự gửi điện thoại đến cửa hàng.</p>
-                    <p> Cách 2: Thu gom tận nhà <HomeTwoTone /> – Cửa hàng đến lấy nếu số lượng lớn.</p>
-                    <p>Cách 3: Nộp tại cửa hàng <ShopTwoTone />– Khách đến trực tiếp để kiểm tra và định giá.</p>
+                <div className='thugomLeft' >
+                    <div>Đăng ký request tái chế:</div>
+                    <p>
+                        Cách 1: Sử dụng chức năng "Đăng ký thu gom" tại mục 6
+                        <div style={{ color: 'red', fontSize: '0.6em' }}>Chú ý: Có thể xem tiến trình diễn ra sau khi đăng ký</div>
+                    </p>
+
+                    <p>
+                        Cách 2: Điền form Google
+                        <div style={{ color: 'red', fontSize: '0.6em' }}>Chú ý: Không thể xem tiến trình diễn ra (dành cho khách hàng không muốn đăng nhập)
+                        </div>
+                    </p>
+                    <div>Lựa chọn 1 trong 3 phương thức</div>
+                    <p>Phương thức 1: Gửi qua bưu điện <DatabaseTwoTone />– Khách tự gửi điện thoại đến cửa hàng.</p>
+                    <p>Phương thức 2: Thu gom tận nhà <HomeTwoTone /> – Cửa hàng đến lấy nếu số lượng lớn.</p>
+                    <p>Phương thức 3: Nộp tại cửa hàng <ShopTwoTone />– Khách đến trực tiếp để kiểm tra và định giá.</p>
                 </div>
                 <div className='thugomRight'>
                     <img src={thugom} alt="Tái chế điện thoại" className="recycle-image" />
@@ -252,20 +327,25 @@ function GreenPhone() {
             </Collapse>
 
             <Divider />
-            <Title level={3}> 6️⃣ Form đăng ký thu gom điện thoại</Title>
+            <Title level={3}> 6️⃣ Form đăng ký thu gom thiết bị điện tử</Title>
 
             <Button type="primary" htmlType="button" onClick={showModal} style={{ marginLeft: '40px', backgroundColor: '#8CC63E' }}>
                 Đăng ký thu gom
             </Button>
-            {requestId && ( // Hiển thị nút "Xem tiến trình" khi requestId có giá trị
-                <Button
-                    type="primary"
-                    onClick={handleViewProgress}
-                    style={{ marginLeft: '10px' }}
-                >
-                    Xem tiến trình
-                </Button>
-            )}
+            {
+                requestId && ( // Hiển thị nút "Xem tiến trình" khi requestId có giá trị
+                    <Button
+                        type="primary"
+                        onClick={handleViewProgress}
+                        style={{ marginLeft: '10px' }}
+                    >
+                        Xem tiến trình
+                    </Button>
+                )
+            }
+            <Button type="link" onClick={openGoogleForm} style={{ marginLeft: '10px' }}>
+                Điền form Google
+            </Button>
             <Modal
                 title={
                     <Space>
@@ -347,6 +427,26 @@ function GreenPhone() {
 
                         </Space>
                     </Form.Item>
+                    <Form.Item label={<Text strong>Hình ảnh</Text>}>
+                        <Upload
+                            name="avatar"
+                            listType="picture-card"
+                            className="avatar-uploader"
+                            showUploadList={false}
+                            customRequest={customUploadRequest}
+                            onChange={handleUploadChange}
+                        >
+                            {imageUrls ? <img
+                                src={imageUrls}
+                                alt="avatar"
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'cover'
+                                }}
+                            /> : uploadButton}
+                        </Upload>
+                    </Form.Item>
                 </Form>
             </Modal>
             <Title level={3}>7️⃣ Ưu Đãi Cho Khách Hàng Khi Tham Gia Tái Chế</Title>
@@ -388,7 +488,7 @@ function GreenPhone() {
                     />
                 </Panel>
             </Collapse>
-        </div>
+        </div >
     );
 }
 

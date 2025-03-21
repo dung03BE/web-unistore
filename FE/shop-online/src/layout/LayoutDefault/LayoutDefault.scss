@@ -147,29 +147,77 @@
         }
       }
     }
-    &__address {
-        display: flex;
-        align-items: center;
-        text-decoration: none;
-        color: #000;
-        gap: 8px;
+    &__announce {
+      position: relative;
+      display: flex;
+      align-items: center;
+      margin-left: 10px;
+    
+      svg {
+          cursor: pointer;
+      }
 
-        .icon-location {
-            display: none; // Since you're using FontAwesome icon
-        }
+      .unread-count {
+          background-color: red;
+          color: white;
+          border-radius: 50%;
+          padding: 2px 6px;
+          font-size: 12px;
+          margin-left: 5px;
+      }
 
-        svg {
-            font-size: 20px;
-        }
+      .notification-dropdown {
+          position: absolute;
+          top: 100%;
+          right: 0;
+          background-color: white;
+          border: 1px solid #ccc;
+          padding: 10px;
+          z-index: 1000;
+          width: 350px; // Tăng kích thước dropdown
+          max-height: 400px;
+          overflow-y: auto;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+          border-radius: 8px; // Bo góc mềm mại hơn
+         
+          .notification-item {
+              padding: 15px; // Tăng padding
+              border-bottom: 1px solid #eee;
+              display: flex; // Sử dụng flexbox để căn chỉnh
+              flex-direction: column; // Sắp xếp các phần tử theo chiều dọc
+             
+              &:last-child {
+                  border-bottom: none;
+              }
 
-        span {
-            font-weight: 500;
-        }
+              h2 {
+                  margin: 0 0 5px 0; // Thêm margin dưới tiêu đề
+                  font-size: 18px;
+                  font-weight: 600; // Làm đậm tiêu đề
+              }
 
-        &:hover {
-            color: #f57c00;
-        }
-    }
+              p {
+                  margin: 5px 0;
+                  font-size: 18px;
+                  white-space: pre-line;
+                  line-height: 1.5; // Tăng khoảng cách dòng
+
+              }
+
+              .notification-date {
+                  font-size: 12px;
+                  color: #888;
+                  margin-top: 8px; // Thêm margin trên ngày tháng
+                  align-self: flex-end; // Căn phải ngày tháng
+              }
+
+              &.unread {
+                  background-color: #f0f8ff;
+                  font-weight: 500; // Giảm độ đậm của chữ
+              }
+          }
+      }
+  }
 
     &__main {
         padding: 20px;
