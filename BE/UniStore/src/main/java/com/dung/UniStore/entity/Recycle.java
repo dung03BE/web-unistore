@@ -1,5 +1,6 @@
 package com.dung.UniStore.entity;
 
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+
 public class Recycle {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,4 +31,6 @@ public class Recycle {
     @JoinColumn(name = "user_id",referencedColumnName = "id")
     private User user;
     private String imageUrl;
+    @Column(name = "coupon_generated")
+    private Boolean couponGenerated = false;
 }

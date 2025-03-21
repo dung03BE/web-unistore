@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class CounponController {
     private final AuthUtil authUtil;
     private final CounponService counponService;
+    //chưa ddc sài , sài để tạo các counpon riêng thui
     @PostMapping
     public ResponseEntity<?> addCounpon() throws ApiException {
         Long userId = authUtil.loggedInUserId();

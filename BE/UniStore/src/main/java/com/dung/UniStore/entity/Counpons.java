@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Counpons {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

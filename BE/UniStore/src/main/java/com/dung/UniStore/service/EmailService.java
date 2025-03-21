@@ -9,6 +9,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -64,5 +65,13 @@ public class EmailService {
         emailContent.append("\nThank you for shopping with us!");
 
         return emailContent.toString();
+    }
+    public void sendCouponNotification(String to, String couponCode) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("🎉 Bạn nhận được phiếu giảm giá!");
+        message.setText("Xin chào, bạn đã nhận được phiếu giảm giá 50%! Mã của bạn: " + couponCode);
+        message.setText("Hãy truy cập website http://localhost:3001/ để nhận sử dụng ưu đãi này!");
+        javaMailSender.send(message);
     }
 }

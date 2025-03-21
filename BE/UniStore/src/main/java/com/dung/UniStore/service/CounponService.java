@@ -23,9 +23,9 @@ public class CounponService {
         {
             throw new ApiException("Người dùng đã có counpon");
         }
-        counpons.setCode("RECYCLE15");
+        counpons.setCode("RECYCLE30");
         counpons.setDiscountType(Counpons.DiscountType.percentage);
-        counpons.setDiscountValue(BigDecimal.valueOf(0.15));
+        counpons.setDiscountValue(BigDecimal.valueOf(0.3));
         counpons.setStartDate(LocalDateTime.now());
         counpons.setEndDate(LocalDateTime.now().plusDays(15));
         counpons.setUser(userRepository.findById(Math.toIntExact(userId)).get());
