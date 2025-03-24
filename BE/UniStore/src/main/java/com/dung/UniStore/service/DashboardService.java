@@ -17,7 +17,7 @@ public class DashboardService {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     // 1. API tổng quan (GỘP)
     public DashboardOverviewDTO getDashboardOverview() {
         String revenueQuery = "SELECT SUM(total_money) FROM orders " +
@@ -39,7 +39,7 @@ public class DashboardService {
         return new DashboardOverviewDTO(totalRevenue, totalOrders, newCustomers, totalEmployees);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     // 2. Doanh thu theo từng tháng
     public List<MonthlyRevenueDTO> getMonthlyRevenue() {
         String sql = "SELECT MONTH(order_date) AS month, SUM(total_money) AS revenue " +
@@ -50,7 +50,7 @@ public class DashboardService {
                 new MonthlyRevenueDTO(rs.getInt("month"), rs.getDouble("revenue"))
         );
     }
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     // 3. Top 5 loại sản phẩm bán chạy nhất
     public List<TopProductTypeDTO> getTopProductTypes() {
         String sql = "SELECT p.name AS type, SUM(oi.quantity) AS value " +
@@ -61,7 +61,7 @@ public class DashboardService {
                 new TopProductTypeDTO(rs.getString("type"), rs.getInt("value"))
         );
     }
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     // 4. Top 5 sản phẩm bán chạy nhất
     public List<TopSellingProductDTO> getTopSellingProducts() {
         String sql = "SELECT p.name AS product_name, c.name  AS category_name, SUM(oi.quantity) AS sold, " +

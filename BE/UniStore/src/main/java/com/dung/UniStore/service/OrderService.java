@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -39,6 +40,7 @@ public class OrderService implements IOrderService{
     private final IOrderDetailService orderDetailService;
     @Autowired
     private EmailService emailService;
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_EMPLOYEE')")
     @Override
     public List<OrderResponse> getAllOrders(OrderFilterForm form) {
         Specification<Order> where = OrderSpecification.buildWhere(form);
@@ -123,7 +125,7 @@ public class OrderService implements IOrderService{
                 .collect(Collectors.toList());
         return orderResponses;
     }
-
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_EMPLOYEE')")
     @Override
     public OrderResponse updateStatusOrder(int id, OrderCreationRequest request) {
         Order order = orderRepository.findById(id)
