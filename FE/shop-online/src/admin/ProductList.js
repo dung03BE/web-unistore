@@ -56,13 +56,11 @@ function ProductList() {
         try {
             const data = await getProductListByCategoryId(page, 8, categoryId);
             if (data) {
-                // Update products for this specific category
                 setCategoryProducts(prev => ({
                     ...prev,
                     [categoryId]: data.content
                 }));
 
-                // Update total pages for this category
                 setTotalPagesMap(prev => ({
                     ...prev,
                     [categoryId]: data.totalPages

@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Card, Statistic, Table, Typography, Space } from 'antd';
+import { Row, Col, Card, Statistic, Table, Typography, Space, message } from 'antd';
 import { ArrowUpOutlined, ShoppingCartOutlined, UserOutlined, DollarOutlined, TeamOutlined } from '@ant-design/icons';
 import { Line, Pie } from '@ant-design/plots';
 import { getMonthlyRevenue, getOverview, getTopProductType, getTopSellingProducts } from '../../services/dashboardService';
+import { useNavigate } from 'react-router-dom';
 
 const { Title } = Typography;
 
@@ -11,18 +12,28 @@ const Dashboard = () => {
     const [revenueData, setRevenueData] = useState([]);
     const [topProductTypes, setTopProductTypes] = useState([]);
     const [topSellingProducts, setTopSellingProducts] = useState([]);
-
+    const navigate = useNavigate();
     useEffect(() => {
         const fetchData = async () => {
-            const overviewData = await getOverview();
-            const revenueData = await getMonthlyRevenue();
-            const productTypeData = await getTopProductType();
-            const sellingProductsData = await getTopSellingProducts();
-
-            setOverview(overviewData);
-            setRevenueData(revenueData);
-            setTopProductTypes(productTypeData);
-            setTopSellingProducts(sellingProductsData);
+            try {
+                const overviewData = await getOverview();
+                const revenueData = await getMonthlyRevenue();
+                const productTypeData = await getTopProductType();
+                const sellingProductsData = await getTopSellingProducts();
+                console.log("sellingProductsData", sellingProductsData);
+                setOverview(overviewData);
+                setRevenueData(revenueData);
+                setTopProductTypes(productTypeData);
+                setTopSellingProducts(sellingProductsData);
+            } catch (error) {
+                console.log("API lỗi:", error.response);
+                if (error.response && error.response.status === 403) {
+                    message.error("Bạn không có quyền truy cập Dashboard!");
+                    navigate("/unauthorized"); // Chuyển hướng đến trang Unauthorized
+                } else {
+                    message.error("Có lỗi xảy ra, vui lòng thử lại!");
+                }
+            }
         };
         fetchData();
     }, []);
@@ -75,7 +86,7 @@ const Dashboard = () => {
             </Row>
 
             <Card title="Top 5 sản phẩm bán chạy">
-                <Table columns={columns} dataSource={topSellingProducts} pagination={false} />
+                <Table columns={columns} dataSource={topSellingProducts || {}} pagination={false} />
             </Card>
         </Space>
     );

@@ -5,8 +5,31 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
-import { store, persistor } from "./store"; // Đảm bảo import đúng
+import { store, persistor } from "./store"; // Import store từ Redux Persist
 import { PersistGate } from "redux-persist/integration/react";
+
+
+const loadCartData = () => {
+  const cartData = localStorage.getItem("persist:root");
+  if (cartData) {
+    try {
+      const parsedData = JSON.parse(cartData);
+      if (parsedData.cartReducer && typeof parsedData.cartReducer === "string") {
+        const cartReducer = JSON.parse(parsedData.cartReducer);
+        console.log("✅ Dữ liệu giỏ hàng từ Redux Persist:", cartReducer);
+      } else {
+        console.warn("⚠️ cartReducer không hợp lệ hoặc không phải là chuỗi JSON.");
+      }
+    } catch (error) {
+      console.error("❌ Lỗi khi parse JSON từ localStorage:", error);
+    }
+  } else {
+    console.warn("⚠️ Không tìm thấy persist:root trong localStorage.");
+  }
+};
+
+// Gọi function để kiểm tra dữ liệu giỏ hàng khi khởi chạy ứng dụng
+loadCartData();
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
