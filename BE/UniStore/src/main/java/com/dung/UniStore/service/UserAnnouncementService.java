@@ -43,7 +43,7 @@ public class UserAnnouncementService {
 
 
     }
-`
+
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_EMPLOYEE','ROLE_USER')")
     public List<AnnouncementResponse> getAnnouncementsForUser(Integer userId) {
         List<UserAnnouncement> userAnnouncements = userAnnouncementRepository.findByUserId(userId);
