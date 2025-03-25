@@ -145,13 +145,15 @@ function ProductList() {
     const handleDeleteConfirm = async () => {
         try {
             console.log(selectedProduct);
-            await deleteProduct(selectedProduct.id); // Gọi API xóa sản phẩm
+            const response = await deleteProduct(selectedProduct.id); // Gọi API xóa sản phẩm
+            if (response.code === 9999) {
+                throw new Error(response.message);
+            }
             notification.success({ message: "Sản phẩm đã được xóa" });
             setDeleteModalVisible(false);
             fetchAllCategoryProducts(); // Cập nhật lại danh sách sản phẩm
         } catch (error) {
-            console.error("Lỗi khi xóa sản phẩm:", error);
-            notification.error({ message: "Lỗi khi xóa sản phẩm" });
+            notification.error({ message: "Bạn không có quyền xóa sản phẩm" });
         }
     };
 

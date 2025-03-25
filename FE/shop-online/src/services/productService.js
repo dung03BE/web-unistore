@@ -1,3 +1,4 @@
+import { message } from "antd";
 import { del, deleteAuth, get, patchAuth, path, post, postAuth, postAuth2, putAuth } from "../utils/request";
 
 export const getProductList = async (page = 0, size = 8, minPrice, maxPrice, search) => {
@@ -83,6 +84,7 @@ export const deleteProduct = async (id) => {
     const path = `products/${id}`;
     try {
         const result = await deleteAuth(path);
+
         return result;
     } catch (error) {
         console.error("Lỗi khi khi xóa mới product:", error);
