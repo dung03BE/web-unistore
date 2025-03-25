@@ -25,6 +25,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -88,6 +89,7 @@ public class ProductService implements IProductService {
         return productResponse;
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @Override
     @Transactional
     @CachePut(value = "products", key = "#id")
@@ -155,6 +157,7 @@ public class ProductService implements IProductService {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Override
     @CacheEvict(value = "products", key = "#id")
     public void deleteProduct(int id) {
@@ -183,6 +186,8 @@ public class ProductService implements IProductService {
 //        productRepository.save(product);
 //        return productMapper.toProductResponse(product);
 //    }
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_EMPLOYEE','CREATE_DATA')")
     @Override
     public ProductResponse createProduct(ProductCreationRequest request) {
         // Kiểm tra danh mục tồn tại
@@ -224,7 +229,7 @@ public class ProductService implements IProductService {
         // Chuyển đổi sản phẩm sang ProductResponse và trả về
         return productMapper.toProductResponse(product);
     }
-
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_EMPLOYEE','CREATE_DATA')")
     @Override
     public ProductImage createProductImage(int id, ProductImageResponse build) throws Exception {
         Product existingProduct = productRepository
