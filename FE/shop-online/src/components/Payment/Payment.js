@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { payMent } from "../../services/paymentService";
+import { payMent, payMentVnpay } from "../../services/paymentService"; // Import cả hai API
 import "./Payment.scss";
 import { message, notification } from "antd";
 import { useNavigate } from "react-router-dom";
 
 function Payment() {
     const userDetails = useSelector((state) => state.userReducer.userDetails);
-
     const cart = useSelector((state) => state.cartReducer.cart);
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
@@ -16,7 +15,7 @@ function Payment() {
         address: '',
         note: '',
         shippingMethod: 'express',
-        paymentMethod: 'cod',
+        paymentMethod: 'cod', // Giá trị mặc định
         email: '',
     });
 
@@ -68,20 +67,54 @@ function Payment() {
             return;
         }
 
+        const orderData = {
+            ...formData,
+            userId: userDetails.id,
+            cartItems: cart.map(item => ({
+                productId: item.info.id,
+                quantity: item.quantity,
+                color: item.info.color,
+            })),
+            totalAmount: finalTotal, // Thêm tổng tiền vào orderData
+        };
+
         try {
-            const orderData = {
-                ...formData,
-                userId: userDetails.id,
-            };
-            const response = await payMent(orderData);
-            notification.success({
-                message: 'Đặt hàng thành công',
-                description: 'Đơn hàng của bạn đã được ghi nhận. Vui lòng check mail!',
-                duration: 4,
-            });
-            setTimeout(() => {
-                navigate('/'); // Chuyển hướng về trang home
-            }, 2000);
+            let response;
+            if (formData.paymentMethod === 'cod') {
+                response = await payMent(orderData);
+                notification.success({
+                    message: 'Đặt hàng thành công',
+                    description: 'Đơn hàng của bạn đã được ghi nhận. Vui lòng check mail!',
+                    duration: 4,
+                });
+                setTimeout(() => {
+                    navigate('/'); // Chuyển hướng về trang home
+                }, 2000);
+            } else if (formData.paymentMethod === 'vnpay') {
+                response = await payMentVnpay(orderData);
+                console.log("responseVNPAY", response);
+                // Xử lý logic sau khi gọi API VNPAY (thường là redirect sang trang thanh toán VNPAY)
+                if (response?.paymentUrl) {
+                    window.location.href = response.paymentUrl; // Redirect sang trang VNPAY
+                    return; // Dừng hàm ở đây để không chạy các notification thành công khác
+                } else {
+                    notification.error({
+                        message: 'Lỗi khởi tạo thanh toán VNPAY',
+                        description: 'Có lỗi xảy ra khi chuẩn bị thanh toán qua VNPAY. Vui lòng thử lại sau.',
+                    });
+                    return;
+                }
+            } else {
+                // Xử lý các phương thức thanh toán khác (nếu có)
+                notification.warning({
+                    message: 'Phương thức thanh toán chưa được hỗ trợ',
+                    description: `Phương thức thanh toán ${formData.paymentMethod} hiện chưa được hỗ trợ.`,
+                });
+                return;
+            }
+
+            // Nếu là COD và gọi API thành công, các notification và navigate đã được xử lý ở trên
+
         } catch (error) {
             console.error('Lỗi đặt hàng:', error);
             notification.error({
@@ -154,8 +187,9 @@ function Payment() {
                             <label htmlFor="paymentMethod">Phương thức thanh toán:</label>
                             <select id="paymentMethod" name="paymentMethod" value={formData.paymentMethod} onChange={handleChange}>
                                 <option value="cod">Thanh toán khi nhận hàng (COD)</option>
-                                <option value="paypal">PayPal</option>
-                                <option value="creditcard">Thẻ tín dụng</option>
+                                {/* <option value="paypal">PayPal</option>
+                                <option value="creditcard">Thẻ tín dụng</option> */}
+                                <option value="vnpay">VNPAY</option>
                             </select>
                         </div>
                         <div className={`form-group ${errors.email ? 'error' : ''}`}>

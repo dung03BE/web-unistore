@@ -13,6 +13,8 @@ import Announce from "../components/Announce/Announce";
 import GreenPhone from "../components/GreenPhone/GreenPhone";
 import Login from "../components/Login";
 import Payment from "../components/Payment/Payment";
+import PaymentResult from "../components/Payment/PaymentResult";
+import ComparePage from "../components/product/ComparePage";
 import ProductDetails from "../components/product/ProductDetail ";
 import Profile from "../components/Profile/Profile";
 import Register from "../components/Profile/Register";
@@ -107,6 +109,7 @@ export const router = [
                 path: "/profile", // Định nghĩa /profile ở cấp độ root
                 element: <Profile />
             },
+
             {
                 path: "/register", // Thêm định tuyến cho register
                 element: <Register />
@@ -118,6 +121,14 @@ export const router = [
             {
                 path: "/announce", // Thêm định tuyến cho register
                 element: <Announce />
+            },
+            {
+                path: "/compare", // Thêm định tuyến cho register
+                element: <ComparePage />
+            },
+            {
+                path: "/payment-result", // Thêm định tuyến cho register
+                element: <PaymentResult />
             }
         ]
     },

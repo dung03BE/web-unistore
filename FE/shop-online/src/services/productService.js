@@ -31,10 +31,21 @@ export const getProductListByCategoryId = async (page = 0, size = 8, categoryId)
 };
 export const getProductById = async (id) => {
     const result = await get(`products/${id}`); // API để lấy chi tiết sản phẩm theo ID
-    console.log("He", result.result);
+    console.log("ProductId:", result.result);
     return result.result;
 };
-
+//compare
+export const compare = async (ids) => {
+    const queryString = ids.join(","); // Chuyển mảng ID thành chuỗi "1,2,3"
+    const result = await get(`products/compare?ids=${queryString}`); // Gọi API với query param
+    console.log("Compare:", result.result);
+    return result.result;
+};
+export const getProductByName = async (name) => {
+    const result = await get(`products/name/${name}`); // API để lấy chi tiết sản phẩm theo ID
+    console.log("ProductName:", result.result);
+    return result.result;
+};
 export const getAdList = async () => {
     // Mô phỏng gọi API trả về danh sách quảng cáo
     return [

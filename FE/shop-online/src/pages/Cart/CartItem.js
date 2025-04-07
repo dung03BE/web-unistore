@@ -1,7 +1,7 @@
 import { useDispatch } from "react-redux";
 import { deleteItem, updateQuantity } from "../../actions/cart";
 import { useEffect, useRef, useState } from "react";
-import { putCartApi } from "../../services/cartService";
+import { deleteCartItem, putCartApi } from "../../services/cartService";
 
 function CartItem({ item }) {
     const inputRef = useRef();
@@ -33,8 +33,16 @@ function CartItem({ item }) {
         }
     };
 
-    const handleDelete = () => {
-        dispatch(deleteItem(item.id));
+    const handleDelete = async () => {
+        console.log("Xóa sản phẩm có id:", item);
+        try {
+            const result = await deleteCartItem(item.id); // Gọi API xóa với cartItemId
+            console.log("Kết quả xóa cart item:", result);
+            dispatch(deleteItem(item.id)); // Cập nhật Redux store sau khi xóa thành công
+        } catch (error) {
+            console.error("Lỗi khi xóa cart item:", error);
+            // Xử lý lỗi nếu cần, ví dụ hiển thị thông báo cho người dùng
+        }
     };
 
     const imageUrl = `http://localhost:8081/uploads/${item.info.image}`; // Xây dựng URL đầy đủ

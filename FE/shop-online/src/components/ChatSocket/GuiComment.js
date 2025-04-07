@@ -28,18 +28,19 @@ const useStyle = createStyles(({ prefixCls, css }) => ({
 const GuiComment = () => {
   const { styles } = useStyle();
   return (
-    <ConfigProvider
-      button={{
-        className: styles.linearGradientButton,
-      }}
-    >
-      <Space>
-        {/* <Button type="primary" size="large" icon={<AntDesignOutlined />}>
-                    Gửi thêm bình luận:
-                </Button> */}
+    <></>
+    // <ConfigProvider
+    //   button={{
+    //     className: styles.linearGradientButton,
+    //   }}
+    // >
+    //   <Space>
+    //     {/* <Button type="primary" size="large" icon={<AntDesignOutlined />}>
+    //                 Gửi thêm bình luận:
+    //             </Button> */}
 
-      </Space>
-    </ConfigProvider>
+    //   </Space>
+    // </ConfigProvider>
   );
 };
 export default GuiComment;

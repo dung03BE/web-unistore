@@ -10,6 +10,16 @@ export const payMent = async (orderData) => {
         throw error;
     }
 };
+export const payMentVnpay = async (orderData) => {
+    const path = `orders/checkoutVnpay`;
+    try {
+        const result = await postAuth(path, orderData);
+        return result;
+    } catch (error) {
+        console.error("Lỗi khi thanh toán:", error);
+        throw error;
+    }
+};
 export const getOrderByUserId = async () => {
     const path = `orders/user`;
     try {

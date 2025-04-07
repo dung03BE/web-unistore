@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { getProductById } from "../../services/productService";
 import { Button, Carousel, Image, message, notification } from "antd";
 import "./ProductDetails.scss";
@@ -10,12 +10,13 @@ import { StarTwoTone, CalculatorTwoTone, FileSearchOutlined } from '@ant-design/
 import ProductSpecs from "./productspec/ProductSpecs";
 import CommitmentBox from "./productspec/CommitmentBox";
 import ChatRoom from "../ChatSocket/ChatRoom";
+import { addToCompare } from "../../actions/compare";
 
 const DEFAULT_IMAGE = "https://png.pngtree.com/png-clipart/20220113/ourmid/pngtree-transparent-bubble-simple-bubble-png-image_4158141.png";
 
 function ProductDetails({ products }) {
-
-
+    const navigate = useNavigate();
+    const [isComparing, setIsComparing] = useState(false);
     const dispatch = useDispatch();
     const { id } = useParams();
     const [product, setProduct] = useState(null);
@@ -133,6 +134,12 @@ function ProductDetails({ products }) {
     const toggleComments = () => {
         setShowComments(!showComments);
     };
+    const handleCompareClick = () => {
+        dispatch(addToCompare(product.id));
+        message.info("Đã thêm sản phẩm vào danh sách so sánh");
+        // Chuyển hướng đến trang so sánh (tùy chọn)
+        navigate('/compare');
+    };
     return (
         <>
             <div className="product-name">
@@ -149,7 +156,7 @@ function ProductDetails({ products }) {
                     </div>
                     <div className="box02__right" data-id="329149" data-href="/dtdd/iphone-16-pro-max" data-img="https://cdn.tgdd.vn/Products/Images/42/329149/iphone-16-pro-max-sa-mac-thumb-600x600.jpg" data-name="Điện thoại iPhone 16 Pro Max 256GB">
                         <i className="icondetail-sosanh"></i>
-                        So sánh <FileSearchOutlined />
+                        <span onClick={handleCompareClick}>So sánh</span> <FileSearchOutlined />
                     </div>
                     <a href="#tab-spec" className="tab-spec">
                         <i className="icondetail-spec"></i>

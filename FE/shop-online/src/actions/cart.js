@@ -1,4 +1,4 @@
-import { getCart } from "../services/cartService";
+import { getCart, getCartItem } from "../services/cartService";
 
 // export const addToCart = (info) => {
 //     const uniqueId = `${info.id}-${info.color}`; // Tạo id duy nhất
@@ -43,20 +43,23 @@ export const fetchCartSuccess = (cartData) => ({
 export const fetchCart = () => {
     return async (dispatch) => {
         try {
-            const cartData = await getCart(); // Gọi API từ cartService
+            const cartData = await getCartItem(); // Gọi API lấy danh sách cart item
+            console.log("Giỏ hàng từ API:", cartData); // Kiểm tra dữ liệu trả về từ API
+
             // Chuyển đổi dữ liệu API về định dạng reducer
-            const formattedCartData = cartData.products.map(product => ({
-                id: `${product.id}-${product.colors[0].color}`, // Tạo id duy nhất
+            const formattedCartData = cartData.map(item => ({
+                id: item.cartItemId, // Sử dụng cartItemId từ backend làm ID
                 info: {
-                    id: product.id,
-                    name: product.name,
-                    price: product.price,
-                    image: product.thumbnails[0].imageUrl,
-                    color: product.colors[0].color,
-                    discountPercentage: product.discount,
+                    id: item.product.id,
+                    name: item.product.name,
+                    price: item.product.price,
+                    image: item.product.thumbnails && item.product.thumbnails.length > 0 ? item.product.thumbnails[0].imageUrl : null,
+                    color: item.color, // Sử dụng trực tiếp item.color
+                    discountPercentage: item.product.discount,
                 },
-                quantity: product.quantity,
+                quantity: item.quantity,
             }));
+
             dispatch(fetchCartSuccess(formattedCartData));
         } catch (error) {
             console.error("Lỗi khi fetch giỏ hàng:", error);

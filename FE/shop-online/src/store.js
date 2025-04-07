@@ -8,6 +8,8 @@ import { thunk } from "redux-thunk";
 const persistConfig = {
     key: "root",
     storage,
+    whitelist: ["userReducer"],
+    // whitelist: ["userReducer", "cartReducer"], // Chỉ lưu userReducer và cartReducer vào localStorage
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
