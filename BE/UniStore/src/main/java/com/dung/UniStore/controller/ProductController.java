@@ -184,5 +184,12 @@ public class ProductController {
                 .result(productService.getProductByName(name))
                 .build();
     }
+    @GetMapping("/compare")
+    public ApiResponse<List<ProductResponse>> compareProducts(@RequestParam List<Integer> ids) {
+
+        return ApiResponse.<List<ProductResponse>>builder()
+                .result(productService.getProductsByIds(ids))
+                .build();
+    }
 
 }

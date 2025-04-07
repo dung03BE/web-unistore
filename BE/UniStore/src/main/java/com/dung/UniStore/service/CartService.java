@@ -1,5 +1,6 @@
 package com.dung.UniStore.service;
 
+import com.dung.UniStore.dto.response.CartItemResponse;
 import com.dung.UniStore.dto.response.CartResponse;
 import com.dung.UniStore.dto.response.ProductDetailsResponse;
 import com.dung.UniStore.dto.response.ProductResponse;
@@ -10,6 +11,8 @@ import com.dung.UniStore.exception.ErrorCode;
 import com.dung.UniStore.mapper.ProductMapper;
 import com.dung.UniStore.repository.*;
 import com.dung.UniStore.utils.AuthUtil;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +20,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -32,7 +36,8 @@ public class CartService implements ICartService {
     private final InventoryRepository inventoryRepository;
     private final ModelMapper modelMapper;
     private final AuthUtil authUtil;
-
+    @PersistenceContext
+    private EntityManager entityManager;
     @Override
     public CartResponse addProToCart(Long productId, Integer quantity, String color) throws Exception {
         Cart cart = createCart(); // Kiểm tra giỏ hàng có tồn tại không
@@ -120,6 +125,22 @@ public class CartService implements ICartService {
         deleteCartAndItems(cart.getCartId());
         return null;
     }
+
+
+    @Transactional
+    @Override
+    public void deleteCartItemByUserId(Long userID, Long cartItemId) throws ApiException {
+        CartItem cartItemToDelete = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new ApiException("Cart item not found"));
+
+        cartItemRepository.deleteByCartItemId(cartItemId);
+        cartItemRepository.flush();   // Ghi thay đổi ngay xuống DB
+        entityManager.clear();
+        entityManager.remove(entityManager.contains(cartItemToDelete) ? cartItemToDelete : entityManager.merge(cartItemToDelete));
+        entityManager.flush();
+        System.out.println("Deleted cart item with ID: " + cartItemId);
+    }
+
 
     public void deleteCartAndItems(Long cartId) {
         Cart cart = cartRepository.findById(cartId)
@@ -362,9 +383,62 @@ public class CartService implements ICartService {
     }
 
     @Override
-    public List<CartItem> getCartItemsByUserId(Long userId) {
-        return cartItemRepository.findCartItemByUserId(userId);
+    public List<CartItemResponse> getCartItemsByUserId(Long userId) {
+        return cartItemRepository.findCartItemByUserId(userId)
+                .stream()
+                .map(this::mapCartItemToCartItemResponse)
+                .collect(Collectors.toList());
     }
 
+    private CartItemResponse mapCartItemToCartItemResponse(CartItem cartItem) {
+        CartItemResponse response = new CartItemResponse();
+        response.setCartItemId(cartItem.getCartItemId());
+        response.setQuantity(cartItem.getQuantity());
+        response.setDiscount(cartItem.getDiscount());
+        response.setProductPrice(cartItem.getProductPrice());
+        response.setColor(cartItem.getColor());
+        // Map Cart
+        if (cartItem.getCart() != null) {
+            CartResponse cartResponse = new CartResponse();
+            cartResponse.setCartId(cartItem.getCart().getCartId());
+            cartResponse.setUserId((long) cartItem.getCart().getUser().getId());
+            response.setCart(cartResponse);
+        }
 
+        // Map Product
+        if (cartItem.getProduct() != null) {
+            ProductResponse productResponse = new ProductResponse();
+            productResponse.setId(cartItem.getProduct().getId());
+            productResponse.setName(cartItem.getProduct().getName());
+            productResponse.setPrice(cartItem.getProduct().getPrice());
+            productResponse.setDiscount(cartItem.getProduct().getDiscount());
+
+            // Map images to thumbnails
+            if (cartItem.getProduct().getImages() != null && !cartItem.getProduct().getImages().isEmpty()) {
+                productResponse.setThumbnails(cartItem.getProduct().getImages().stream()
+                        .map(image -> {
+                            ProductResponse.ProductImageResponse imageResponse = new ProductResponse.ProductImageResponse();
+                            imageResponse.setId(image.getId());
+                            imageResponse.setImageUrl(image.getImageUrl());
+                            return imageResponse;
+                        })
+                        .collect(Collectors.toList()));
+            }
+
+            // Handle null colors
+            if (cartItem.getProduct().getColors() != null && !cartItem.getProduct().getColors().isEmpty()) {
+                productResponse.setColors(cartItem.getProduct().getColors().stream()
+                        .map(color -> {
+                            ProductResponse.ProductColorResponse colorResponse = new ProductResponse.ProductColorResponse();
+                            colorResponse.setId(color.getId());
+                            colorResponse.setColor(color.getColor());
+                            return colorResponse;
+                        })
+                        .collect(Collectors.toList()));
+            }
+            response.setProduct(productResponse);
+        }
+
+        return response;
+    }
 }

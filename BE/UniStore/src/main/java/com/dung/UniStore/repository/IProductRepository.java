@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface IProductRepository extends JpaRepository<Product,Integer>, JpaSpecificationExecutor<Product> {
@@ -18,4 +19,6 @@ public interface IProductRepository extends JpaRepository<Product,Integer>, JpaS
 
     // Sửa lại trong IProductRepository
     Page<Product> findAllByCategoryId(int categoryId, Pageable pageable);
+
+
 }

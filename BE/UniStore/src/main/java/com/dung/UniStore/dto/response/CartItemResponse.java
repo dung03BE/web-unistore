@@ -14,5 +14,6 @@ public class CartItemResponse {
     private Integer quantity;
     private Double discount;
     private Double productPrice;
+    private String color;
 
 }

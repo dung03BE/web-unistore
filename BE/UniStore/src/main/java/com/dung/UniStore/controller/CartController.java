@@ -1,5 +1,6 @@
 package com.dung.UniStore.controller;
 
+import com.dung.UniStore.dto.response.CartItemResponse;
 import com.dung.UniStore.dto.response.CartResponse;
 
 import com.dung.UniStore.entity.Cart;
@@ -76,10 +77,10 @@ public class CartController {
     }
 
     @GetMapping("/cart")
-    public ResponseEntity<List<CartItem>> getCartByUserId() {
+    public ResponseEntity<List<CartItemResponse>> getCartByUserId() {
 
         Long userID = authUtil.loggedInUserId();
-        List<CartItem> cartItems = cartService.getCartItemsByUserId(userID);
+        List<CartItemResponse> cartItems = cartService.getCartItemsByUserId(userID);
         return ResponseEntity.ok(cartItems);
     }
     @DeleteMapping("")
@@ -87,6 +88,12 @@ public class CartController {
         Long userID = authUtil.loggedInUserId();
         CartResponse cartResponse = cartService.deleteCartByUserId(userID);
         return new ResponseEntity<>(cartResponse, HttpStatus.OK);
+    }
+    @DeleteMapping("cartItemId/{cartItemId}")
+    public ResponseEntity<String> deleteCartItemByUserId(@PathVariable Long cartItemId) throws ApiException {
+        Long userID = authUtil.loggedInUserId();
+        cartService.deleteCartItemByUserId(userID, cartItemId);
+        return ResponseEntity.ok("Cart item deleted successfully.");
     }
 
 }

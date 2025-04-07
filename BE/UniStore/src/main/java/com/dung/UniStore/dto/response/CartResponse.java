@@ -18,7 +18,7 @@ public class CartResponse {
 
     private Long cartId;
 
-
+    private Long UserId;
     private List<ProductResponse> products= new ArrayList<>();
 
     private Double totalPrice=0.0;

@@ -30,4 +30,6 @@ public interface IProductService {
     List<ProductResponse> getAll();
 
     Page<ProductResponse> getAllProductsByCategory(Pageable pageable,int categoryId);
+
+    List<ProductResponse> getProductsByIds(List<Integer> ids);
 }

@@ -1,5 +1,6 @@
 package com.dung.UniStore.service;
 
+import com.dung.UniStore.dto.response.CartItemResponse;
 import com.dung.UniStore.dto.response.CartResponse;
 import com.dung.UniStore.entity.CartItem;
 import com.dung.UniStore.exception.ApiException;
@@ -15,8 +16,10 @@ public interface ICartService {
 
     @Transactional
     CartResponse updateProductQuantityInCart(Long productId, int quantityChange,String color) throws ApiException;
-    List<CartItem> getCartItemsByUserId(Long userId);
+    List<CartItemResponse> getCartItemsByUserId(Long userId);
     CartResponse addProToCart(Long productId, Integer quantity, String color) throws Exception;
 
     CartResponse deleteCartByUserId(Long userId) throws ApiException;
+
+    void deleteCartItemByUserId(Long userID, Long cartItemId) throws ApiException;
 }

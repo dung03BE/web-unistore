@@ -44,6 +44,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,"/api/v1/orders").hasAnyAuthority("ROLE_ADMIN","ROLE_EMPLOYEE")
                                 .requestMatchers("/v3/api-docs/**").permitAll()  // Cho phép truy cập đến API docs
                                 .requestMatchers("/swagger-ui/**").permitAll()
+                                .requestMatchers("/vnpay-payment").permitAll()
 //                                .anyRequest().authenticated()
                               .anyRequest().permitAll()
                 )

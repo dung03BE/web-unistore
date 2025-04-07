@@ -11,5 +11,6 @@ public interface IOrderRepository extends JpaRepository<Order,Integer> , JpaSpec
 
     Order findByUserId(int userId);
 
-    List<Order> findAllByUserId(int userId);
+    List<Order> findAllByUserIdOrderByOrderDateDesc(int userId);
+
 }

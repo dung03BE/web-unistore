@@ -18,6 +18,6 @@ public class CommentController {
     private ICommentRepository commentRepository;
     @GetMapping("/{productId}")
     public List<Comment> getCommentsByProductId(@PathVariable Long productId) {
-        return commentRepository.findByProductId(productId);
+        return commentRepository.findByProductIdOrderByTimestampDesc(productId);
     }
 }

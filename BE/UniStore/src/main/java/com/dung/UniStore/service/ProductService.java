@@ -296,4 +296,32 @@ public class ProductService implements IProductService {
         // Tạo một đối tượng `Page<ProductResponse>` mới từ danh sách `ProductResponse`
         return new PageImpl<>(productResponses, pageable, productPage.getTotalElements());
     }
+
+    @Override
+    public List<ProductResponse> getProductsByIds(List<Integer> ids) {
+        List<Product> products = productRepository.findAllById(ids);
+
+        if (products.isEmpty()) {
+            throw new AppException(ErrorCode.PRODUCT_NOT_EXISTED);
+        }
+
+        List<ProductResponse> productResponses = products.stream().map(product -> {
+            ProductResponse productResponse = productMapper.toProductResponse(product);
+
+            // Lấy chi tiết sản phẩm
+            ProductDetails productDetails = productDetailsRepository.findByProductId(product.getId());
+            ProductDetailsResponse productDetailsResponse = productMapper.toProductDetailsResponse(productDetails);
+            productResponse.setDetails(productDetailsResponse);
+
+            // Lấy số lượng tồn kho
+            InventoryItem inventoryItem = inventoryRepository.findByProductId(product.getId());
+            int quantity = (inventoryItem != null) ? inventoryItem.getQuantity() : 0;
+            productResponse.setQuantity(quantity);
+
+            return productResponse;
+        }).collect(Collectors.toList());
+
+        return productResponses;
+    }
+
 }

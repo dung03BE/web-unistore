@@ -29,4 +29,10 @@ public interface ICartItemRepository extends JpaRepository<CartItem,Long> {
     CartItem findCartItemByProductIdAndCartIdAndColor(@Param("cartId") Long cartId, @Param("productId") Long productId, @Param("color") String color);
 
     List<CartItem> findByCartCartId(Long cartId);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM CartItem c WHERE c.cartItemId = :cartItemId")
+    void deleteByCartItemId(@Param("cartItemId") Long cartItemId);
+
 }
