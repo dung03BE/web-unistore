@@ -1,5 +1,6 @@
 package com.dung.UniStore.service;
 
+import com.dung.UniStore.dto.request.RoleRequest;
 import com.dung.UniStore.dto.response.UserResponse;
 import com.dung.UniStore.entity.Role;
 import com.dung.UniStore.entity.User;
@@ -14,13 +15,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +37,7 @@ public class UserService {
     private final IRoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final RestTemplate restTemplate;
 
     public UserResponse createUser(UserCreationRequest form) throws Exception {
 
@@ -70,9 +78,10 @@ public class UserService {
     @PreAuthorize("hasRole('ADMIN')") // ktra admin trc khi vaof method
     //@PostAuthorize("hasRole('ADMIN')") //goi method r moi kiem tra admin
     /// sẽ k hoạt động vì hasRole chỉ hd với Role k permission nen phải sd hasAuthority @PreAuthorize("hasAuthority('APPROVE_POST')")
-    public List<User> getAllUsers() {
-        log.info("In method get info");
-        return userRepository.findAll();
+    public List<UserResponse> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(userMapper::toUserResponse)
+                .collect(Collectors.toList());
     }
 
     //post hoox tro them laays đúng user dang login
@@ -160,5 +169,57 @@ public class UserService {
         }
         // Trả về phản hồi sử dụng mapper
         return userMapper.toUserResponse(user);
+    }
+
+    public void updateRoleforUser(int id, int roleId) throws ApiException {
+        User user = userRepository.findById(id).orElseThrow(
+                () -> new AppException(ErrorCode.USER_NOT_EXISTED)
+        );
+        Role role = roleRepository.findById(roleId)
+                .orElseThrow(() -> new ApiException("Role not exists"));
+        user.setRole(role);
+        userRepository.save(user);
+
+    }
+
+    public void deleteUser(int id) throws ApiException {
+        User existingUser = userRepository.findById(id).orElseThrow(
+                () -> new ApiException("Dont find User with id:" + id));
+        userRepository.deleteById(id);
+    }
+
+    public UserResponse updateUserByAdmin(UserCreationRequest request, int id) throws ApiException {
+        User user = userRepository.findById(Math.toIntExact(id)).orElseThrow(
+                () -> new AppException(ErrorCode.USER_NOT_EXISTED)
+        );
+        user.setFullName(request.getFullName());
+        //user.setPassword(request.getPassword());
+        user.setEmail(request.getEmail());
+        user.setAddress(request.getAddress());
+        if (!user.getPhoneNumber().equals(request.getPhoneNumber())) {
+            if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
+                throw new ApiException("Số điện thoại đã tồn tại trong hệ thống!");
+            } else {
+                user.setPhoneNumber(request.getPhoneNumber());
+            }
+        }
+
+        user.setDateOfBirth(request.getDateOfBirth());
+
+        userRepository.save(user);
+        return userMapper.toUserResponse(user);
+    }
+
+    public boolean verifyCaptcha(String token) {
+        String secret = "6LfsghIrAAAAAKJ24wOyXEyS2hkLknLzCuSn_x0N";
+        String url = "https://www.google.com/recaptcha/api/siteverify";
+
+
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("secret", secret);
+        params.add("response", token);
+
+        ResponseEntity<Map> response = restTemplate.postForEntity(url, params, Map.class);
+        return (Boolean) response.getBody().get("success");
     }
 }

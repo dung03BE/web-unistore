@@ -6,11 +6,13 @@ import "./ProductDetails.scss";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCartSuccess, updateQuantity } from "../../actions/cart";
 import { addToCartAPI, getCart } from "../../services/cartService";
+
 import { StarTwoTone, CalculatorTwoTone, FileSearchOutlined } from '@ant-design/icons';
 import ProductSpecs from "./productspec/ProductSpecs";
 import CommitmentBox from "./productspec/CommitmentBox";
 import ChatRoom from "../ChatSocket/ChatRoom";
 import { addToCompare } from "../../actions/compare";
+import { getInventoryByProduct } from "../../services/inventoryService"; // Import hàm lấy inventory
 
 const DEFAULT_IMAGE = "https://png.pngtree.com/png-clipart/20220113/ourmid/pngtree-transparent-bubble-simple-bubble-png-image_4158141.png";
 
@@ -18,16 +20,18 @@ function ProductDetails({ products }) {
     const navigate = useNavigate();
     const [isComparing, setIsComparing] = useState(false);
     const dispatch = useDispatch();
-    const { id } = useParams();
+    const { id: productId } = useParams(); // Đổi tên id thành productId để rõ ràng hơn
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [mainImage, setMainImage] = useState(DEFAULT_IMAGE); // Ảnh chính
     const [selectedColor, setSelectedColor] = useState(null);
+    const [inventory, setInventory] = useState([]); // State để lưu trữ thông tin kho
     const cart = useSelector(state => state.cartReducer);
     const [fourthImage, setFourthImage] = useState(null);
     const [comments, setComments] = useState([]);
     const [showComments, setShowComments] = useState(false); // Thêm state để kiểm soát hiển thị comment
-    console.log("PRODUCT:" + products);
+    const [isAddToCartDisabled, setIsAddToCartDisabled] = useState(true); // State để kiểm soát trạng thái nút
+
     const offers = [
         {
             id: 1,
@@ -51,11 +55,12 @@ function ProductDetails({ products }) {
             link: '#details-link' // You would replace this with your actual link
         }
     ];
+
     useEffect(() => {
-        const fetchProduct = async () => {
+        const fetchProductDetails = async () => {
             try {
-                const data = await getProductById(id);
-                console.log("IDproduct:" + id);
+                const data = await getProductById(productId);
+
                 if (data) {
                     setProduct(data);
                     setMainImage(`http://localhost:8081/uploads/${data.thumbnails?.[0]?.imageUrl || DEFAULT_IMAGE}`);
@@ -71,29 +76,112 @@ function ProductDetails({ products }) {
                     }
                 }
                 setLoading(false);
+
+                // Gọi API lấy comment
                 const fetchComments = async () => {
                     try {
-                        const response = await fetch(`http://localhost:8081/api/v1/comments/${id}`);
-
+                        const response = await fetch(`http://localhost:8081/api/v1/comments/${productId}`);
                         if (!response.ok) {
                             throw new Error(`HTTP error! status: ${response.status}`);
                         }
                         const data = await response.json();
                         setComments(data);
-                        console.log("commnet:", data);
+                        console.log("comment:", data);
                     } catch (error) {
                         console.error('Error fetching comments:', error);
                     }
                 };
                 fetchComments();
+
             } catch (error) {
                 console.error("Lỗi khi lấy dữ liệu sản phẩm:", error);
                 setLoading(false);
             }
         };
-        fetchProduct();
-    }, [id]);
-    console.log(product);
+
+        fetchProductDetails();
+    }, [productId]);
+
+    // Gọi API lấy inventory khi component mount hoặc khi productId thay đổi
+    useEffect(() => {
+        const fetchInventory = async () => {
+            if (productId) {
+                try {
+                    const inventoryData = await getInventoryByProduct(productId);
+                    setInventory(inventoryData);
+                    console.log("Inventory Data:", inventoryData);
+
+                    // Cập nhật trạng thái nút ban đầu
+                    if (selectedColor && inventoryData && inventoryData.length > 0) {
+                        const initialInventory = inventoryData.find(
+                            (item) => item.color.toLowerCase() === selectedColor.toLowerCase()
+                        );
+                        setIsAddToCartDisabled(!initialInventory || initialInventory.quantity <= 0);
+                        const quantityElement = document.getElementById("inventory-item");
+                        if (quantityElement) {
+                            quantityElement.textContent = `${initialInventory ? initialInventory.quantity + ' sản phẩm có sẵn' : "Không có sẵn"}`;
+                            quantityElement.style.opacity = 0.6;
+                        }
+                    } else if (!selectedColor) {
+                        setIsAddToCartDisabled(true); // Vô hiệu hóa khi chưa chọn màu
+                        const quantityElement = document.getElementById("inventory-item");
+                        if (quantityElement) {
+                            quantityElement.textContent = `Số lượng kho: Vui lòng chọn màu`;
+                            quantityElement.style.opacity = 0.6;
+                        }
+                    } else {
+                        setIsAddToCartDisabled(true); // Vô hiệu hóa nếu không tìm thấy inventory
+                        const quantityElement = document.getElementById("inventory-item");
+                        if (quantityElement) {
+                            quantityElement.textContent = `Không có sẵn`;
+                            quantityElement.style.opacity = 0.6;
+                        }
+                    }
+                } catch (error) {
+                    console.error("Lỗi khi lấy thông tin kho:", error);
+                    setIsAddToCartDisabled(true);
+                    const quantityElement = document.getElementById("inventory-item");
+                    if (quantityElement) {
+                        quantityElement.textContent = `Lỗi khi tải số lượng kho`;
+                        quantityElement.style.opacity = 0.6;
+                    }
+                }
+            }
+        };
+        fetchInventory();
+    }, [productId, selectedColor]);
+
+    // Cập nhật trạng thái nút khi màu sắc thay đổi
+    useEffect(() => {
+        if (selectedColor && inventory && inventory.length > 0) {
+            const selectedInventory = inventory.find(
+                (item) => item.color.toLowerCase() === selectedColor.toLowerCase()
+            );
+            const hasStock = selectedInventory && selectedInventory.quantity > 0;
+            setIsAddToCartDisabled(!hasStock); // Cập nhật trạng thái nút
+            const quantityElement = document.getElementById("inventory-item");
+            if (quantityElement) {
+                quantityElement.textContent = `${selectedInventory ? selectedInventory.quantity + ' sản phẩm có sẵn' : "Không có sẵn"}`;
+                quantityElement.style.opacity = 0.6;
+            }
+        } else if (!selectedColor) {
+            setIsAddToCartDisabled(true); // Vô hiệu hóa khi chưa chọn màu
+            const quantityElement = document.getElementById("inventory-item");
+            if (quantityElement) {
+                quantityElement.textContent = `Số lượng kho: Vui lòng chọn màu`;
+                quantityElement.style.opacity = 0.6;
+            } else {
+                setIsAddToCartDisabled(true); // Vô hiệu hóa nếu không có inventory
+                const quantityElement = document.getElementById("inventory-item");
+                if (quantityElement) {
+                    quantityElement.textContent = `Không có sẵn`;
+                    quantityElement.style.opacity = 0.6;
+                }
+            }
+        }
+    }, [selectedColor, inventory]);
+
+    console.log("Product:", product);
     if (loading) return <div>Đang tải thông tin sản phẩm...</div>;
     if (!product) return <div>Không tìm thấy sản phẩm này.</div>;
 
@@ -102,6 +190,7 @@ function ProductDetails({ products }) {
     const handleColorClick = (color) => {
         setSelectedColor(color);
     };
+
     const handleAddToCart = async () => {
         if (!selectedColor) {
             notification.error({
@@ -111,12 +200,30 @@ function ProductDetails({ products }) {
             return;
         }
 
+        // Kiểm tra số lượng trong kho trước khi thêm vào giỏ hàng
+        const selectedInventory = inventory.find(
+            (item) => item.color.toLowerCase() === selectedColor.toLowerCase()
+        );
+
+        if (!selectedInventory || selectedInventory.quantity <= 0) {
+            notification.error({
+                message: 'Lỗi',
+                description: 'Sản phẩm này hiện đang hết hàng với màu đã chọn.',
+            });
+            return;
+        }
+
         try {
-            await addToCartAPI(product.id, 1, selectedColor);
+            const result = await addToCartAPI(product.id, 1, selectedColor);
+            console.log("Result:", result);
             const updatedCart = await getCart();
             dispatch(fetchCartSuccess(updatedCart));
             if (updatedCart.code == 1013) {
                 message.error("Out of stock");
+                return;
+            }
+            if (result === "LoginValid") {
+                message.error("Vui lòng đăng nhập trước khi thêm sản phẩm vào giỏ hàng");
                 return;
             }
             notification.success({
@@ -145,7 +252,7 @@ function ProductDetails({ products }) {
             <div className="product-name">
 
                 <div className="box02">
-                    <h1 className="product__title">Điện thoại {product.name}</h1>
+                    <h1 className="product__title"> {product.name}</h1>
                     <span className="quantity-sale">Đã bán 94,5k</span>
 
 
@@ -233,7 +340,7 @@ function ProductDetails({ products }) {
                             width="100%"
                         />
                     </a>
-                    <div>Lưa chọn GB</div>
+
                     <div className="color-picker">
                         {product.colors?.map((color) => (
 
@@ -263,13 +370,16 @@ function ProductDetails({ products }) {
                     <div id="selected-color">
                         Màu đã chọn: <span>{selectedColor}</span>
                     </div>
+                    <div id="inventory-item" style={{ opacity: 0.6, fontSize: "20px" }}>
+                        Số lượng kho: Vui lòng chọn màu
+                    </div>
                     <div className="header__price">
                         Mua ngay với giá
                     </div>
                     <div className="product__price">
 
                         <div className="price">
-                            {product.price.toLocaleString()}₫
+                            {product.price?.toLocaleString()}₫
                         </div>
                     </div>
                     <div className="inner-box">
@@ -294,7 +404,7 @@ function ProductDetails({ products }) {
                 <button onClick={toggleComments}>
                     {showComments ? "Ẩn bình luận" : "Xem bình luận"}
                 </button>
-                {showComments && <ChatRoom initialComments={comments} productId={id} />}
+                {showComments && <ChatRoom initialComments={comments} productId={productId} />}
             </div>
         </>
     );

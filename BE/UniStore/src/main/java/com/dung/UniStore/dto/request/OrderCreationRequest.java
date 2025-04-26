@@ -32,4 +32,5 @@ public class OrderCreationRequest {
     private LocalDate shippingDate;
     private String paymentMethod;
     private Status status;
+    private String couponCode;
 }

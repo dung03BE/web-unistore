@@ -49,9 +49,10 @@ export const getProductByName = async (name) => {
 export const getAdList = async () => {
     // Mô phỏng gọi API trả về danh sách quảng cáo
     return [
-        "https://cdnv2.tgdd.vn/mwg-static/tgdd/Banner/22/6f/226f42d420e8421f838fd1fd229ecd5a.png",
-        "https://cdnv2.tgdd.vn/mwg-static/tgdd/Banner/0c/05/0c058f2a093564f1f324362c4626506d.png",
-        "https://cdnv2.tgdd.vn/mwg-static/tgdd/Banner/16/b3/16b33991e1de9fb816b988ea2dde16d9.png"
+        "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:format(webp):quality(75)/H1_1440x242_bd59d1c143.png",
+        "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:format(webp):quality(75)/H1_1440x242_3809fd8db1.png",
+        "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:format(webp):quality(75)/H1_1440x242_9ed505bfa4.png",
+
     ];
 };
 

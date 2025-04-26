@@ -46,11 +46,11 @@ export const PersonalInfo = ({ userDetails }) => {
     const handleUpdateUser = async () => {
         try {
             const updatedUserData = {
-                fullname: fullName, // Thay đổi fullName thành full_name
-                phone_number: phoneNumber, // Thay đổi phoneNumber thành phone_number
+                fullName: fullName, // Thay đổi fullName thành full_name
+                phoneNumber: phoneNumber, // Thay đổi phoneNumber thành phone_number
                 address,
                 email,
-                date_of_birth: dob.toDate(),
+                dateOfBirth: dob.toDate(),
             };
 
             const response = await putUserApi(updatedUserData);

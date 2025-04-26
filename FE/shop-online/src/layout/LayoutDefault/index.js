@@ -1,7 +1,7 @@
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import "./LayoutDefault.scss";
 import CartMini from "../../components/CartMini";
-import logo from '../../images/Logo.png';
+import logo from '../../images/Logo2.png';
 import bct from '../../images/bct.svg';
 import { BellOutlined, RestOutlined, SyncOutlined, UserOutlined } from '@ant-design/icons';
 import {
@@ -209,15 +209,15 @@ function LayoutDefault() {
                                     <div className="dropdown-menu">
                                         <NavLink to="/profile" onClick={() => setShowDropdown(false)}>
                                             <FontAwesomeIcon icon={faUser} />
-                                            <span>Profile</span>
+                                            <span>Trang cá nhân</span>
                                         </NavLink>
                                         <NavLink to="/settings" onClick={() => setShowDropdown(false)}>
                                             <FontAwesomeIcon icon={faCog} />
-                                            <span>Settings</span>
+                                            <span>Cài đặt</span>
                                         </NavLink>
                                         <button onClick={handleLogout}>
                                             <FontAwesomeIcon icon={faSignOutAlt} />
-                                            <span>Logout</span>
+                                            <span>Đăng xuất</span>
                                         </button>
                                     </div>
                                 )}
@@ -265,14 +265,16 @@ function LayoutDefault() {
                 ></df-messenger> */}
                 <footer className="layout-default__footer">
                     <div className="layout-default__infor">
-                        <h4>Công ty thương mại điện tử DX3</h4>
+                        <h4>Cửa hàng Uni</h4>
                         <span>
                             <FontAwesomeIcon icon={faLocationDot} />
                         </span>
                         <p>Số 1 Hoàng Công Chất, Phú Diễn, Nam Từ Liêm, Hà Nội, Việt Nam</p>
+
                         <span>
                             <FontAwesomeIcon icon={faPhone} />
                         </span>
+
                         <p>0399999999</p>
                         <span>
                             <FontAwesomeIcon icon={faEnvelope} />

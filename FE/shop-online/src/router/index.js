@@ -1,4 +1,4 @@
-import CustomerManagement from "../admin/CustomerManagement";
+import InventoryManagement from "../admin/InventoryManagement";
 import Dashboard from "../admin/Dashboard/Dashboard";
 
 import LayoutAdmin from "../admin/LayoutAdmin";
@@ -6,7 +6,7 @@ import OrderManageMent from "../admin/OrderManagement";
 import ProductCategories from "../admin/ProductCategories";
 import ProductList from "../admin/ProductList";
 import RecycleManagement from "../admin/RecycleManagement";
-import StaffManagement from "../admin/StaffManagement";
+import UserManagement from "../admin/UserManagement";
 import SystemSettings from "../admin/SystemSettings";
 import VoucherManagement from "../admin/VoucherManagement";
 import Announce from "../components/Announce/Announce";
@@ -22,7 +22,7 @@ import LayoutDefault from "../layout/LayoutDefault";
 import Unauthorized from "../layout/LayoutDefault/Unauthorized";
 import Cart from "../pages/Cart";
 import Home from "../pages/Home";
-import PromotionList from "../services/PromotionList";
+import PromotionList from "../admin/PromotionList";
 import ProtectedRoute from "./ProtectedRoute";
 
 export const adminRoutes = {
@@ -50,19 +50,19 @@ export const adminRoutes = {
                     element: <OrderManageMent />,
                 },
                 {
-                    path: "customers",
-                    element: <CustomerManagement />,
+                    path: "inventory",
+                    element: <InventoryManagement />,
                 },
                 {
-                    path: "staff",
-                    element: <StaffManagement />,
+                    path: "users",
+                    element: <UserManagement />,
                 },
                 {
                     path: "recycle",
                     element: <RecycleManagement />,
                 },
                 {
-                    path: "promotions/list",
+                    path: "promotions",
                     element: <PromotionList />,
                 },
                 {

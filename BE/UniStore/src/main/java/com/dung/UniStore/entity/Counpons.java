@@ -28,6 +28,7 @@ public class Counpons {
     private LocalDateTime startDate;
     @Column(name="end_date")
     private LocalDateTime endDate;
+    @Enumerated(EnumType.STRING)
     private Status status;
     @ManyToOne
     @JoinColumn(name = "user_id",referencedColumnName = "id")
@@ -36,6 +37,13 @@ public class Counpons {
     public  enum DiscountType {
         percentage,fixed_amount
     }
+    @Column(name = "usage_limit")
+    private Integer usageLimit; // tổng số lượt cho phép
+    @Column(name = "used_count")
+    private Integer usedCount = 0; // mặc định là 0
+
+    @Column(name = "user_limit")
+    private Integer userLimit = 1; // mỗi user dùng tối đa mấy lần
 
 
 }

@@ -25,6 +25,9 @@ const Profile = () => {
     const [collapsed, setCollapsed] = useState(false);
     const [selectedMenu, setSelectedMenu] = useState('1');
     const navigate = useNavigate();
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
     const {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();

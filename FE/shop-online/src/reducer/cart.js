@@ -48,15 +48,15 @@ const cartReducer = (state = initialState, action) => {
             return {
                 ...state,
                 cart: state.cart.map((item) =>
-                    item.id === action.id
-                        ? { ...item, quantity: item.quantity + action.quantity }
+                    item.id === action.payload.itemId // Sử dụng action.payload.itemId
+                        ? { ...item, quantity: action.payload.quantity } // Sử dụng action.payload.quantity
                         : item
                 ),
             };
         case "DELETE_ITEM":
             return {
                 ...state,
-                cart: state.cart.filter((item) => item.id !== action.id),
+                cart: state.cart.filter((item) => item.id !== action.id), // Action payload là itemId
             };
         case "DELETE_ALL":
             return {

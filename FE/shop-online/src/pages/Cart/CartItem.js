@@ -11,39 +11,86 @@ function CartItem({ item }) {
     const debounceRef = useRef(null);
     console.log("item", item);
     // Cập nhật API sau 500ms nếu có thay đổi số lượng
-    useEffect(() => {
-        if (quantity !== item.quantity) {
-            clearTimeout(debounceRef.current);
-            debounceRef.current = setTimeout(() => {
-                putCartApi(item.info.id, quantity, item.info.color)
-                    .then(() => console.log("Đã cập nhật giỏ hàng"))
-                    .catch((error) => console.error("Lỗi khi cập nhật giỏ hàng:", error));
-            }, 500);
-        }
-    }, [quantity, item.id, item.info.color]);
-
     const handleUp = () => {
-        setQuantity((prev) => prev + 1);
+        updateQuantityAndApi(quantity + 1); // Cập nhật số lượng và gọi API
     };
 
     const handleDown = () => {
         if (quantity > 1) {
-            setQuantity((prev) => prev - 1);
-            dispatch(updateQuantity(item.id, quantity - 1));  // Cập nhật Redux store
+            updateQuantityAndApi(quantity - 1);
         }
     };
 
+    // useEffect(() => {
+    //     if (quantity !== item.quantity) {
+    //         clearTimeout(debounceRef.current);
+    //         debounceRef.current = setTimeout(() => {
+    //             putCartApi(item.info.id, quantity, item.info.color) // Vẫn gọi API để đồng bộ
+    //                 .then(() => console.log("Đã cập nhật giỏ hàng (API)"))
+    //                 .catch((error) => console.error("Lỗi khi cập nhật giỏ hàng (API):", error));
+    //         }, 500);
+    //     }
+    // }, [quantity, item.id, item.info.color]);
+    const updateQuantityAndApi = (newQuantity) => {
+        setQuantity(newQuantity);
+        clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => {
+            putCartApi(item.info.id, newQuantity, item.info.color)
+                .then(() => console.log("Đã cập nhật giỏ hàng (API)"))
+                .catch((error) => console.error("Lỗi khi cập nhật giỏ hàng (API):", error));
+        }, 500);
+        dispatch(updateQuantity(item.id, newQuantity)); // Cập nhật Redux ngay lập tức
+    };
     const handleDelete = async () => {
         console.log("Xóa sản phẩm có id:", item);
         try {
-            const result = await deleteCartItem(item.id); // Gọi API xóa với cartItemId
+            const result = await deleteCartItem(item.id);
             console.log("Kết quả xóa cart item:", result);
-            dispatch(deleteItem(item.id)); // Cập nhật Redux store sau khi xóa thành công
+            dispatch(deleteItem(item.id));
+
         } catch (error) {
             console.error("Lỗi khi xóa cart item:", error);
-            // Xử lý lỗi nếu cần, ví dụ hiển thị thông báo cho người dùng
         }
     };
+
+
+    // const handleUp = () => {
+    //     const newQuantity = quantity + 1;
+    //     setQuantity(newQuantity);
+    //     putCartApi(item.info.id, newQuantity, item.info.color)
+    //         .then(() => {
+    //             console.log("Đã cập nhật giỏ hàng (tăng)");
+    //             dispatch(updateQuantity(item.id, newQuantity));
+    //             window.location.reload(); // Reload sau khi cập nhật thành công
+    //         })
+    //         .catch((error) => console.error("Lỗi khi cập nhật giỏ hàng:", error));
+    // };
+
+    // const handleDown = () => {
+    //     if (quantity > 1) {
+    //         const newQuantity = quantity - 1;
+    //         setQuantity(newQuantity);
+    //         putCartApi(item.info.id, newQuantity, item.info.color)
+    //             .then(() => {
+    //                 console.log("Đã cập nhật giỏ hàng (giảm)");
+    //                 dispatch(updateQuantity(item.id, newQuantity));
+    //                 window.location.reload(); // Reload sau khi cập nhật thành công
+    //             })
+    //             .catch((error) => console.error("Lỗi khi cập nhật giỏ hàng:", error));
+    //     }
+    // };
+
+    // const handleDelete = async () => {
+    //     console.log("Xóa sản phẩm có id:", item);
+    //     try {
+    //         const result = await deleteCartItem(item.id); // Gọi API xóa với cartItemId
+    //         console.log("Kết quả xóa cart item:", result);
+    //         dispatch(deleteItem(item.id)); // Cập nhật Redux store sau khi xóa thành công
+    //     } catch (error) {
+    //         console.error("Lỗi khi xóa cart item:", error);
+    //         // Xử lý lỗi nếu cần, ví dụ hiển thị thông báo cho người dùng
+    //     }
+    // };
 
     const imageUrl = `http://localhost:8081/uploads/${item.info.image}`; // Xây dựng URL đầy đủ
 
@@ -58,9 +105,9 @@ function CartItem({ item }) {
             </div>
             <div className="cart__item-price">
                 <div className="cart__item-price-new">
-                    {((item.info.price * (100 - (item.info.discountPercentage || 0))) / 100).toFixed(2)}$
+                    {((item.info.price * (100 - (item.info.discountPercentage || 0))) / 100).toFixed(2)}VNĐ
                 </div>
-                <div className="cart__item-price-old">{item.info.price}$</div>
+                <div className="cart__item-price-old">{item.info.price}VNĐ</div>
             </div>
             <div className="cart__item-quantity">
                 <button onClick={handleDown}>-</button>

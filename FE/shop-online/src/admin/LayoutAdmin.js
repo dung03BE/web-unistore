@@ -22,7 +22,7 @@ const menuItems = [
     {
         key: 'dashboard',
         icon: <DashboardOutlined />,
-        label: 'Dashboard',
+        label: 'Thống kê',
     },
     {
         key: 'products',
@@ -45,14 +45,14 @@ const menuItems = [
         label: 'Quản lý đơn hàng',
     },
     {
-        key: 'customers',
+        key: 'inventory',
         icon: <UserOutlined />,
-        label: 'Quản lý khách hàng',
+        label: 'Quản lý kho',
     },
     {
-        key: 'staff',
+        key: 'users',
         icon: <TeamOutlined />,
-        label: 'Quản lý nhân viên',
+        label: 'Quản lý người dùng',
     },
     {
         key: 'recycle',
@@ -62,17 +62,8 @@ const menuItems = [
     {
         key: 'promotions',
         icon: <GiftOutlined />,
-        label: 'Khuyến mãi',
-        children: [
-            {
-                key: 'promotions-list',
-                label: 'Chương trình giảm giá',
-            },
-            {
-                key: 'vouchers',
-                label: 'Mã giảm giá',
-            },
-        ],
+        label: 'Chương trình khuyến mãi'
+
     },
     {
         key: 'settings',
@@ -82,7 +73,7 @@ const menuItems = [
     {
         key: 'logout',
         icon: <UploadOutlined />,
-        label: 'Đăng suất',
+        label: 'Đăng xuất',
     },
 ];
 
@@ -131,17 +122,17 @@ const LayoutAdmin = () => {
             case 'orders':
                 path = '/admin/orders';
                 break;
-            case 'customers':
-                path = '/admin/customers';
+            case 'inventory':
+                path = '/admin/inventory';
                 break;
-            case 'staff':
-                path = '/admin/staff';
+            case 'users':
+                path = '/admin/users';
                 break;
             case 'recycle':
                 path = '/admin/recycle';
                 break;
-            case 'promotions-list':
-                path = '/admin/promotions/list';
+            case 'promotions':
+                path = '/admin/promotions';
                 break;
             case 'vouchers':
                 path = '/admin/promotions/vouchers';
@@ -172,7 +163,7 @@ const LayoutAdmin = () => {
                     top: 0,
                     bottom: 0,
                 }}
-                width={300}
+                width={310}
             >
                 <div className="demo-logo-vertical" style={{ height: 32, margin: 16, background: 'rgba(255, 255, 255, 0.2)' }} />
                 <Menu
@@ -188,7 +179,7 @@ const LayoutAdmin = () => {
             <Layout style={{ marginLeft: collapsed ? 80 : 300, transition: 'all 0.2s' }}>
                 <Header style={{ padding: 0, background: colorBgContainer }}>
                     <div style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: 24 }}>
-                        <span>Admin Dashboard</span>
+                        <span>Trang quản trị</span>
                     </div>
                 </Header>
                 <Content style={{ margin: '24px 16px', overflow: 'initial' }}>

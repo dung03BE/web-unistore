@@ -50,6 +50,10 @@ public class RecycleService {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_EMPLOYEE')")
     public List<RecycleResponse> getAllRecycleRequest() {
         List<Recycle> recycles = recycleRepository.findAll();
+
+        // Sắp xếp theo createdAt giảm dần
+        recycles.sort((r1, r2) -> r2.getCreatedAt().compareTo(r1.getCreatedAt()));
+
         return recycles.stream().map(recycle -> {
             RecycleResponse response = modelMapper.map(recycle, RecycleResponse.class);
             if (recycle.getUser() != null) {
@@ -59,11 +63,17 @@ public class RecycleService {
             return response;
         }).toList();
     }
+
     public List<RecycleResponse> getAllRecycleRequest(Long userId) {
         List<Recycle> recycles = recycleRepository.findAllByUserId(userId);
+
+        // Sắp xếp theo createdAt giảm dần
+        recycles.sort((r1, r2) -> r2.getCreatedAt().compareTo(r1.getCreatedAt()));
+
         Type listType = new TypeToken<List<RecycleResponse>>() {}.getType();
         return modelMapper.map(recycles, listType);
     }
+
 
 
     public RecycleResponse updateStatusRecycle(int id, RecycleRequest request) throws ApiException {

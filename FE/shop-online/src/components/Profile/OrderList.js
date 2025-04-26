@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { getOrderByUserId } from '../../services/paymentService';
 import { Collapse, Badge } from 'antd'; // Import Badge
-
+import { useNavigate } from 'react-router-dom';
 const { Panel } = Collapse;
 
 export const OrderList = () => {
@@ -13,7 +13,7 @@ export const OrderList = () => {
     const [searchKeyword, setSearchKeyword] = useState('');
     const [filterStatus, setFilterStatus] = useState('Tất cả');
     const [statusCounts, setStatusCounts] = useState({}); // State to store counts
-
+    const navigate = useNavigate();
     useEffect(() => {
         const fetchOrders = async () => {
             try {
@@ -22,7 +22,8 @@ export const OrderList = () => {
                     console.log("Order la:", response);
                     const convertedOrders = response.map(order => ({
                         ...order,
-                        statusDisplay: convertStatus(order.status)
+                        statusDisplay: convertStatus(order.status),
+                        paymentStatusDisplay: convertPaymentStatus(order.payment_status)
                     }));
                     setOrders(convertedOrders);
                 } else {
@@ -60,7 +61,16 @@ export const OrderList = () => {
                 return status;
         }
     };
-
+    const convertPaymentStatus = (paymentStatus) => {
+        switch (paymentStatus) {
+            case 'SUCCESS':
+                return 'Thành công';
+            case 'PENDING':
+                return 'Chưa thanh toán';
+            default:
+                return paymentStatus;
+        }
+    };
     const filterOrders = () => {
         let filtered = orders;
 
@@ -103,7 +113,9 @@ export const OrderList = () => {
     if (error) {
         return <div>{error}</div>;
     }
-
+    const handleViewProductDetail = (productId) => {
+        navigate(`/product/${productId}`);
+    };
     return (
         <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
@@ -147,6 +159,16 @@ export const OrderList = () => {
                         <p><strong>Ngày đặt:</strong> {new Date(order.order_date).toLocaleDateString()}</p>
                         <p><strong>Tổng tiền:</strong> {order.total_money.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</p>
                         <p><strong>Phương thức thanh toán:</strong> {order.payment_method}</p>
+                        <p>
+                            <strong>Trạng thái thanh toán:</strong>
+                            <span
+                                style={{
+                                    color: order.payment_status === 'SUCCESS' ? 'green' : order.payment_status === 'PENDING' ? 'red' : 'black'
+                                }}
+                            >
+                                {order.paymentStatusDisplay}
+                            </span>
+                        </p>
                         <p><strong>Phương thức vận chuyển:</strong> {order.shipping_method}</p>
                         <p><strong>Địa chỉ giao hàng:</strong> {order.address}</p>
                         <p><strong>Ghi chú:</strong> {order.note || 'Không có ghi chú'}</p>
@@ -159,7 +181,17 @@ export const OrderList = () => {
                                     <strong>Số lượng:</strong> {detail.quantity},
                                     <strong>Giá:</strong> {detail.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })},
                                     <strong>Màu:</strong> {detail.color}
-                                    <a> Xem chi tiết sản phẩm</a>
+                                    <a
+                                        href={`/product/${detail.productId}`}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            handleViewProductDetail(detail.productId);
+                                        }}
+                                        style={{ marginLeft: '10px', color: 'blue', textDecoration: 'underline', cursor: 'pointer' }}
+                                    >
+
+                                        Xem chi tiết sản phẩm
+                                    </a>
                                 </li>
                             ))}
                         </ul>

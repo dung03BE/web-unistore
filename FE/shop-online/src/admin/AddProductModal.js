@@ -131,7 +131,7 @@ const AddProductModal = ({ visible, onCancel, onSuccess, categories }) => {
                     Hủy
                 </Button>,
                 <Button key="submit" type="primary" loading={loading} onClick={handleSubmit} className="modal-btn submit-btn">
-                    Tạo sản phẩm
+                    Thêm mới
                 </Button>,
             ]}
         >

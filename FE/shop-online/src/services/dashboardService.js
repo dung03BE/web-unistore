@@ -5,11 +5,11 @@ export const getOverview = async () => {
     try {
         const result = await getAuth(`dashboard/overview`);
         if (result?.code === 9999) {
-            message.error("Bạn không có quyền truy cập Dashboard!");
-            return [];
+            message.error("Bạn không có quyền truy cập Trang quản trị!");
+            return null;
         }
         console.log("result1", result);
-        return result || [];
+        return result || null;
     } catch (error) {
         handleApiError(error);
         return [];

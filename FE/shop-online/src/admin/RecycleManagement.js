@@ -6,6 +6,9 @@ import { colors } from "@mui/material";
 function RecycleManagement() {
     const [recycleRequests, setRecycleRequests] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedStatusFilter, setSelectedStatusFilter] = useState('all');
+    const [filteredRequests, setFilteredRequests] = useState([]);
+
     useEffect(() => {
         const fetchRecycleRequests = async () => {
             try {
@@ -20,6 +23,15 @@ function RecycleManagement() {
 
         fetchRecycleRequests();
     }, []);
+
+    useEffect(() => {
+        if (selectedStatusFilter === 'all') {
+            setFilteredRequests(recycleRequests);
+        } else {
+            setFilteredRequests(recycleRequests.filter(request => request.status === selectedStatusFilter));
+        }
+    }, [recycleRequests, selectedStatusFilter]);
+
     const handleStatusChange = async (requestId, newStatus) => {
         try {
             await putStatusRecycleRq(requestId, { status: newStatus });
@@ -35,6 +47,11 @@ function RecycleManagement() {
             message.error('Cập nhật trạng thái thất bại!');
         }
     };
+
+    const handleStatusFilterChange = (value) => {
+        setSelectedStatusFilter(value);
+    };
+
     const columns = [
         { title: 'ID', dataIndex: 'id', key: 'id' },
         { title: 'Loại thiết bị', dataIndex: 'deviceType', key: 'deviceType' },
@@ -50,6 +67,7 @@ function RecycleManagement() {
                     statusStyle = {
                         textDecoration: 'line-through',
                         backgroundColor: 'red',
+                        color: 'white',
                     };
                 } else if (status === "Đang xử lý") {
                     statusStyle = {
@@ -73,6 +91,18 @@ function RecycleManagement() {
                     </Select>
                 );
             },
+            filters: [
+                { text: 'Tất cả', value: 'all' },
+                { text: 'Chờ xác nhận', value: 'Chờ xác nhận' },
+                { text: 'Đang xử lý', value: 'Đang xử lý' },
+                { text: 'Hoàn thành', value: 'Hoàn thành' },
+            ],
+            onFilter: (value, record) => {
+                if (value === 'all') {
+                    return true;
+                }
+                return record.status === value;
+            },
         },
         { title: 'Ngày tạo', dataIndex: 'createdAt', key: 'createdAt' },
         { title: 'Họ tên', dataIndex: 'fullName', key: 'fullName' },
@@ -93,7 +123,20 @@ function RecycleManagement() {
 
     return (
         <>
-            <Table dataSource={recycleRequests} columns={columns} loading={loading} rowKey="id" style={{ fontSize: '20px' }} />
+            <div style={{ marginBottom: 16 }}>
+                <span style={{ marginRight: 8 }}>Lọc theo trạng thái:</span>
+                <Select
+                    defaultValue="all"
+                    style={{ width: 170 }}
+                    onChange={handleStatusFilterChange}
+                >
+                    <Select.Option value="all">Tất cả</Select.Option>
+                    <Select.Option value="Chờ xác nhận">Chờ xác nhận</Select.Option>
+                    <Select.Option value="Đang xử lý">Đang xử lý</Select.Option>
+                    <Select.Option value="Hoàn thành">Hoàn thành</Select.Option>
+                </Select>
+            </div>
+            <Table dataSource={filteredRequests} columns={columns} loading={loading} rowKey="id" style={{ fontSize: '20px' }} />
         </>
     )
 }

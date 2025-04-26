@@ -1,10 +1,9 @@
 package com.dung.UniStore.dto.request;
 
-import java.util.Set;
-
-import com.dung.UniStore.entity.Permission;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -12,6 +11,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RoleRequest {
+    int id;
     String name;
     String description;
     Set<String> permissions;

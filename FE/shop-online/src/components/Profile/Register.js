@@ -1,20 +1,23 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { Form, Input, Button, DatePicker, message, Typography, Card, Space, Divider, Row, Col } from 'antd';
 import { UserOutlined, LockOutlined, HomeOutlined, PhoneOutlined, MailOutlined, CalendarOutlined } from '@ant-design/icons';
 import { postUserApi } from '../../services/userService';
 import { useNavigate } from 'react-router-dom';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 const { Title, Text } = Typography;
 
 function Register() {
     const [form] = Form.useForm();
     const navigate = useNavigate();
-
+    const recaptchaRef = useRef(null);
+    const [captchaValue, setCaptchaValue] = useState(null);
     const onFinish = async (values) => {
         try {
             const formattedValues = {
                 ...values,
-                date_of_birth: values.date_of_birth.format('YYYY-MM-DD'),
+                dateOfBirth: values.dateOfBirth.format('YYYY-MM-DD'),
+                recaptcha: captchaValue, // Thêm giá trị captcha
             };
 
             const response = await postUserApi(formattedValues);
@@ -24,6 +27,9 @@ function Register() {
                 navigate('/login');
             } else if (response.code === 1002) {
                 message.error('Số điện thoại đã tồn tại!');
+            }
+            else if (response.code === 1008) {
+                message.error(response.message);
             }
             else if (response.code === 1008) {
                 message.error(response.message);
@@ -78,7 +84,7 @@ function Register() {
                             <Col xs={24} sm={12}>
                                 <Form.Item
                                     label="Số điện thoại"
-                                    name="phone_number"
+                                    name="phoneNumber"
                                     rules={[{ required: true, message: 'Vui lòng nhập số điện thoại!' }]}
                                 >
                                     <Input
@@ -90,7 +96,7 @@ function Register() {
                             <Col xs={24} sm={12}>
                                 <Form.Item
                                     label="Họ và tên"
-                                    name="fullname"
+                                    name="fullName"
                                     rules={[{ required: true, message: 'Vui lòng nhập họ và tên!' }]}
                                 >
                                     <Input
@@ -157,7 +163,7 @@ function Register() {
                             <Col xs={24} sm={12}>
                                 <Form.Item
                                     label="Ngày sinh"
-                                    name="date_of_birth"
+                                    name="dateOfBirth"
                                     rules={[{ required: true, message: 'Vui lòng chọn ngày sinh!' }]}
                                 >
                                     <DatePicker
@@ -184,7 +190,13 @@ function Register() {
                                 </Form.Item>
                             </Col>
                         </Row>
-
+                        <Form.Item>
+                            <ReCAPTCHA
+                                sitekey="6LfsghIrAAAAAJYV-bXQP5O5pJ_0kFo338qY-g3L" // ← thay bằng site key từ Google
+                                onChange={(value) => setCaptchaValue(value)}
+                                ref={recaptchaRef}
+                            />
+                        </Form.Item>
                         <Form.Item style={{ marginTop: 12 }}>
                             <Button
                                 type="primary"

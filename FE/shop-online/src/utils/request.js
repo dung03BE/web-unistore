@@ -133,3 +133,22 @@ export const patchAuth = async (path, options) => {
     const result = await response.json();
     return result;
 };
+
+export const getAuthv2 = async (path) => {
+    const accessToken = getAccessToken();
+    const response = await fetch(API_DOMAIN + path, {
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+        },
+    });
+
+    const result = await response.json();
+
+    // if (!response.ok) {
+    //     // Có thể bao gồm message từ server nếu có
+    //     const errorMessage = result?.message || result?.Message || 'Lỗi không xác định từ máy chủ';
+    //     throw new Error(errorMessage); // ✅ ném lỗi để try...catch bên ngoài xử lý
+    // }
+
+    return result;
+};

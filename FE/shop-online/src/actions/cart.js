@@ -1,5 +1,5 @@
 import { getCart, getCartItem } from "../services/cartService";
-
+export const UPDATE_QUANTITY = 'UPDATE_QUANTITY';
 // export const addToCart = (info) => {
 //     const uniqueId = `${info.id}-${info.color}`; // Tạo id duy nhất
 //     console.log("🛒 Dispatching ADD_TO_CART:", { uniqueId, info });
@@ -9,12 +9,12 @@ import { getCart, getCartItem } from "../services/cartService";
 //         info: info
 //     }
 // }
-export const updateQuantity = (id, quantity = 1) => {
+export const updateQuantity = (itemId, quantity = 1) => {
     return {
-        type: "UPDATE_QUANTITY",
-        id: id,
-        quantity: quantity
-    }
+        type: UPDATE_QUANTITY,
+        payload: { itemId, quantity },
+    };
+
 }
 export const deleteItem = (id) => {
     return {

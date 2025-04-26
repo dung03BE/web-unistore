@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { payMent, payMentVnpay } from "../../services/paymentService"; // Import cả hai API
+import { getCouponByUser, payMent, payMentVnpay } from "../../services/paymentService"; // Import cả hai API
 import "./Payment.scss";
 import { message, notification } from "antd";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +9,9 @@ function Payment() {
     const userDetails = useSelector((state) => state.userReducer.userDetails);
     const cart = useSelector((state) => state.cartReducer.cart);
     const navigate = useNavigate();
+    const [couponCode, setCouponCode] = useState('');
+    const [coupon, setCoupon] = useState(null);
+    const [couponError, setCouponError] = useState('');
     const [formData, setFormData] = useState({
         fullName: '',
         phoneNumber: '',
@@ -75,22 +78,46 @@ function Payment() {
                 quantity: item.quantity,
                 color: item.info.color,
             })),
-            totalAmount: finalTotal, // Thêm tổng tiền vào orderData
+            totalAmount: finalTotalAfterDiscount, // Thêm tổng tiền vào orderData
+            couponCode: coupon?.code,
         };
 
         try {
             let response;
             if (formData.paymentMethod === 'cod') {
                 response = await payMent(orderData);
-                notification.success({
-                    message: 'Đặt hàng thành công',
-                    description: 'Đơn hàng của bạn đã được ghi nhận. Vui lòng check mail!',
-                    duration: 4,
-                });
-                setTimeout(() => {
-                    navigate('/'); // Chuyển hướng về trang home
-                }, 2000);
+                console.log("responseCOD", response);
+                if (response.code === 1000) { // Kiểm tra một thuộc tính thành công giả định trong response
+                    notification.success({
+                        message: 'Đặt hàng thành công',
+                        description: response.message || 'Đơn hàng của bạn đã được ghi nhận. Vui lòng check mail!', // Sử dụng message từ response nếu có
+                        duration: 4,
+                    });
+                    setTimeout(() => {
+                        navigate('/'); // Chuyển hướng về trang home
+                    }, 2000);
+                } else {
+                    console.log("Lỗi từ payMent API:", response);
+                    if (response?.code === 1016) {
+                        notification.error({
+                            message: 'Lỗi đặt hàng',
+                            description: response.message,
+                        });
+                    }
+                    else if (response?.code === 1017) { // Thêm một fallback để hiển thị lỗi nếu không phải code 1016
+                        notification.error({
+                            message: 'Lỗi đặt hàng',
+                            description: response.message || 'Mã giảm giá đã quá người sử dụng!',
+                        });
+                    } else if (response) { // Thêm một fallback để hiển thị lỗi nếu không phải code 1016
+                        notification.error({
+                            message: 'Lỗi đặt hàng',
+                            description: response.message || response.Message || 'Đã có lỗi xảy ra khi đặt hàng.',
+                        });
+                    }
+                }
             } else if (formData.paymentMethod === 'vnpay') {
+
                 response = await payMentVnpay(orderData);
                 console.log("responseVNPAY", response);
                 // Xử lý logic sau khi gọi API VNPAY (thường là redirect sang trang thanh toán VNPAY)
@@ -98,11 +125,28 @@ function Payment() {
                     window.location.href = response.paymentUrl; // Redirect sang trang VNPAY
                     return; // Dừng hàm ở đây để không chạy các notification thành công khác
                 } else {
-                    notification.error({
-                        message: 'Lỗi khởi tạo thanh toán VNPAY',
-                        description: 'Có lỗi xảy ra khi chuẩn bị thanh toán qua VNPAY. Vui lòng thử lại sau.',
-                    });
-                    return;
+                    // notification.error({
+                    //     message: 'Lỗi khởi tạo thanh toán VNPAY',
+                    //     description: 'Có lỗi xảy ra khi chuẩn bị thanh toán qua VNPAY. Vui lòng thử lại sau.',
+                    // });
+                    // return;
+                    if (response?.code === 1016) {
+                        notification.error({
+                            message: 'Lỗi đặt hàng',
+                            description: response.message,
+                        });
+                    }
+                    else if (response?.code === 1017) { // Thêm một fallback để hiển thị lỗi nếu không phải code 1016
+                        notification.error({
+                            message: 'Lỗi đặt hàng',
+                            description: response.message || 'Mã giảm giá đã quá người sử dụng!',
+                        });
+                    } else if (response) { // Thêm một fallback để hiển thị lỗi nếu không phải code 1016
+                        notification.error({
+                            message: 'Lỗi đặt hàng',
+                            description: response.message || response.Message || 'Đã có lỗi xảy ra khi đặt hàng.',
+                        });
+                    }
                 }
             } else {
                 // Xử lý các phương thức thanh toán khác (nếu có)
@@ -121,6 +165,7 @@ function Payment() {
                 message: 'Lỗi đặt hàng',
                 description: 'Có lỗi xảy ra trong quá trình đặt hàng. Vui lòng thử lại sau.',
             });
+
         }
     };
 
@@ -129,8 +174,49 @@ function Payment() {
         (acc, item) => acc + (item.info.price * (item.info.discountPercentage || 0) / 100) * item.quantity,
         0
     );
-    const finalTotal = total - discount;
-    console.log("user:" + userDetails);
+    // const finalTotal = total - discount;
+    // console.log("user:" + userDetails);
+    const calculateDiscountedPrice = () => {
+        if (coupon && coupon.status === 'active') {
+            if (coupon.discountType === 'percentage') {
+                return total * coupon.discountValue;
+            } else if (coupon.discountType === 'fixed') {
+                return coupon.discountValue;
+            }
+        }
+        return 0;
+    };
+
+    const discountedPrice = calculateDiscountedPrice();
+    const finalTotalAfterDiscount = total - discount - discountedPrice;
+
+    const handleCouponCodeChange = (e) => {
+
+        setCouponCode(e.target.value);
+        setCoupon(null); // Reset coupon khi người dùng nhập lại mã
+        setCouponError('');
+    };
+    const handleApplyCoupon = async () => {
+        if (!couponCode.trim()) {
+            setCouponError('Vui lòng nhập mã giảm giá.');
+            return;
+        }
+        try {
+            const response = await getCouponByUser(couponCode);
+            if (response !== null) {
+                setCoupon(response);
+                message.success(`Áp dụng mã giảm giá "${couponCode}" thành công!`);
+                console.log("response", response);
+            } else {
+                setCouponError('Mã giảm giá không hợp lệ hoặc đã hết hạn.');
+                setCoupon(null);
+            }
+        } catch (error) {
+            console.error('Lỗi khi áp dụng coupon:', error);
+            setCouponError(error.message || 'Có lỗi xảy ra khi áp dụng mã giảm giá.');
+            setCoupon(null);
+        }
+    };
     return (
         <>
             <h2>Thông tin thanh toán</h2>
@@ -230,13 +316,31 @@ function Payment() {
                                     <span>Tổng tiền</span>
                                     <span className="cart__summary-value">{total.toLocaleString()} VNĐ</span>
                                 </div>
+                                <div className="coupon">
+                                    <input
+                                        type="text"
+                                        placeholder="Nhập mã giảm giá"
+                                        value={couponCode}
+                                        onChange={handleCouponCodeChange}
+                                    />
+                                    <button type="button" className="apply-coupon" onClick={handleApplyCoupon}>
+                                        Áp dụng
+                                    </button>
+                                    {couponError && <div className="error-text">{couponError}</div>}
+                                </div>
                                 <div className="cart__summary-row">
-                                    <span>Tổng khuyến mãi</span>
+                                    <span>Tổng khuyến mãi sản phẩm</span>
                                     <span className="cart__summary-value">{discount.toLocaleString()} VNĐ</span>
                                 </div>
+                                {coupon && coupon.status === 'active' && (
+                                    <div className="cart__summary-row">
+                                        <span>Giảm giá từ mã</span>
+                                        <span className="cart__summary-value">-{discountedPrice.toLocaleString()} VNĐ</span>
+                                    </div>
+                                )}
                                 <div className="cart__summary-row cart__summary-total">
                                     <span>Cần thanh toán</span>
-                                    <span className="cart__summary-value">{finalTotal.toLocaleString()} VNĐ</span>
+                                    <span className="cart__summary-value">{finalTotalAfterDiscount.toLocaleString()} VNĐ</span>
                                 </div>
                             </div>
                         </div>

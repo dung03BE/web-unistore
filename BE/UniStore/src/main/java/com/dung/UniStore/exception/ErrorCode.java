@@ -22,8 +22,12 @@ public enum ErrorCode {
     ORDER_NOT_EXISTS(1012, "ORDER not existed", HttpStatus.NOT_FOUND),
     OutofStock(1013, "Out of Stock", HttpStatus.BAD_REQUEST),
     PRODUCT_EXISTS_CART(1014,"Product exists in the cart",HttpStatus.BAD_REQUEST),
-    EMAIL_EXISTED(1015, "Email existed", HttpStatus.BAD_REQUEST)
-    ;
+    EMAIL_EXISTED(1015, "Email existed", HttpStatus.BAD_REQUEST),
+    COUPON_IS_USED(1016,"Bạn đã sử dụng mã giảm giá này rồi!",HttpStatus.INTERNAL_SERVER_ERROR),
+    LIMITED_USED(1017,"Mã giảm giá đã hết lượt sử dụng!",HttpStatus.BAD_REQUEST),
+    COUPON_IS_ERROR(1018,"Mã giảm giá hết hạn!",HttpStatus.INTERNAL_SERVER_ERROR),
+
+            ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
         this.code = code;

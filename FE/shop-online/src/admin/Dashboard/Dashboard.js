@@ -71,7 +71,7 @@ const Dashboard = () => {
 
     return (
         <Space direction="vertical" size="large" style={{ width: '100%' }}>
-            <Title level={2}>Dashboard</Title>
+            <Title level={2}>Thống kê</Title>
 
             <Row gutter={16}>
                 <Col span={6}><Card><Statistic title="Doanh thu tháng" value={overview.totalRevenue} precision={0} valueStyle={{ color: '#3f8600' }} prefix={<DollarOutlined />} formatter={(value) => `${(value / 1000000).toFixed(0)} triệu`} /></Card></Col>

@@ -1,5 +1,6 @@
 package com.dung.UniStore.dto.response;
 
+import com.dung.UniStore.entity.PaymentStatus;
 import com.dung.UniStore.entity.Status;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
@@ -38,6 +39,8 @@ public class OrderResponse {
     private String trackingNumber ;
     @JsonProperty("payment_method")
     private String paymentMethod;
+    @JsonProperty("payment_status") // Trạng thái thanh toán
+    private PaymentStatus paymentStatus; // Thêm trạng thái thanh toán
     @JsonProperty("is_active")
     private Boolean active;
     @JsonProperty("order_details")

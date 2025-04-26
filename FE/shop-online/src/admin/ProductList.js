@@ -14,7 +14,7 @@ import Search from "antd/es/transfer/search";
 import { AntDesignOutlined, AppstoreOutlined, AudioOutlined } from "@ant-design/icons";
 import AddProductModal from "./AddProductModal";
 import EditProductModal from "./EditProductModal";
-
+import { useNavigate } from 'react-router-dom';
 const DEFAULT_IMAGE =
     "https://png.pngtree.com/png-clipart/20220113/ourmid/pngtree-transparent-bubble-simple-bubble-png-image_4158141.png";
 
@@ -30,7 +30,7 @@ function ProductList() {
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [activeCollapseKeys, setActiveCollapseKeys] = useState([]);
     const [addModalVisible, setAddModalVisible] = useState(false);
-
+    const navigate = useNavigate();
     // Hard-coded categories for now
     // In a real application, you'd fetch these from an API
     const fetchedCategories = [
@@ -66,6 +66,7 @@ function ProductList() {
                     [categoryId]: data.totalPages
                 }));
             }
+
         } catch (error) {
             console.error(`Error fetching products for category ${categoryId}:`, error);
             notification.error({
@@ -167,7 +168,24 @@ function ProductList() {
     };
     const columns = [
         { title: "ID", dataIndex: "id", key: "id" },
-        { title: "Tên", dataIndex: "name", key: "name" },
+        {
+            title: "Tên",
+            dataIndex: "name",
+            key: "name",
+            render: (text, record) => (
+
+                <a
+                    href={`/product/${record.id}`}
+                    onClick={(e) => {
+                        e.preventDefault();
+                        handleViewProductDetail(record.id);
+                    }}
+                    style={{ color: 'blue', textDecoration: 'underline', cursor: 'pointer', textDecoration: 'none' }}
+                >
+                    {text}
+                </a>
+            ),
+        },
         { title: "Giá (VNĐ)", dataIndex: "price", key: "price" },
         {
             title: "Hình ảnh",
@@ -220,7 +238,9 @@ function ProductList() {
     if (loading) {
         return <div>Loading...</div>;
     }
-
+    const handleViewProductDetail = (productId) => {
+        navigate(`/product/${productId}`);
+    };
     return (
         <div className="productList">
             <div className="headerPro">

@@ -119,7 +119,7 @@ function GreenPhone() {
     );
     const handleViewProgress = () => {
         console.log('View progress:', requestId);
-        navigate(`/progress/${requestId}`); // Điều hướng đến trang tiến trình
+        navigate(`/profile`); // Điều hướng đến trang tiến trình
     };
     // Hàm xử lý upload ảnh
     const handleUploadChange = (info) => {

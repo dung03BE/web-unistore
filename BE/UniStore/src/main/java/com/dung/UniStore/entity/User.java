@@ -9,6 +9,7 @@ import org.hibernate.annotations.BatchSize;
 
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -48,4 +49,8 @@ public class User extends BaseEntity {
     @ToString.Exclude
     @OneToOne(mappedBy = "user",cascade = {CascadeType.PERSIST,CascadeType.MERGE},orphanRemoval = true)
     private Cart cart;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Counpons> counpons;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Order> orders;
 }

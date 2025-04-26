@@ -8,7 +8,7 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import MoreIcon from '@mui/icons-material/MoreVert';
 import Cart from "../../../pages/Cart";
-import logo from "../../../images/Logo.png";
+import logo from "../../../images/Logo2.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 const Search = styled("div")(({ theme }) => ({
   position: "relative",

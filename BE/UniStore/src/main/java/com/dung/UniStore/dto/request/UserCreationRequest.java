@@ -16,10 +16,11 @@ import java.util.Date;
 @AllArgsConstructor
 @Builder
 public class UserCreationRequest {
-    @JsonProperty("fullname")
+
+    @JsonProperty("fullName")
     private String fullName;
     @Size(min = 4,message = "USERNAME_INVALID")
-    @JsonProperty("phone_number")
+
 
     private String phoneNumber;
     private String address;
@@ -29,7 +30,7 @@ public class UserCreationRequest {
     private String password;
     @JsonProperty("retype_password")
     private String retypePassword;
-    @JsonProperty("date_of_birth")
+
     @DobConstraint(min = 10, message = "INVALID_DOB")
 
     private Date dateOfBirth;
@@ -40,4 +41,6 @@ public class UserCreationRequest {
     @JsonProperty("role_id")
     private int roleId;
     private String email;
+    @JsonProperty("recaptcha")
+    private String recaptcha;
 }

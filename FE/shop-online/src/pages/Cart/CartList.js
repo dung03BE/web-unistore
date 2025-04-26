@@ -35,15 +35,15 @@ function CartList() {
                             <h3>Thông tin đơn hàng</h3>
                             <div className="cart__summary-row">
                                 <span>Tổng tiền</span>
-                                <span className="cart__summary-value">0.00$</span>
+                                <span className="cart__summary-value">0.00VNĐ</span>
                             </div>
                             <div className="cart__summary-row">
                                 <span>Tổng khuyến mãi</span>
-                                <span className="cart__summary-value">0.00$</span>
+                                <span className="cart__summary-value">0.00VNĐ</span>
                             </div>
                             <div className="cart__summary-row cart__summary-total">
                                 <span>Cần thanh toán</span>
-                                <span className="cart__summary-value">0.00$</span>
+                                <span className="cart__summary-value">0.00VNĐ</span>
                             </div>
                             <button className="cart__checkout-btn">Xác nhận đơn</button>
                         </div>
@@ -94,15 +94,15 @@ function CartList() {
                         <h3>Thông tin đơn hàng</h3>
                         <div className="cart__summary-row">
                             <span>Tổng tiền</span>
-                            <span className="cart__summary-value">{total.toFixed(2)}$</span>
+                            <span className="cart__summary-value">{total.toFixed(2)}VNĐ</span>
                         </div>
                         <div className="cart__summary-row">
                             <span>Tổng khuyến mãi</span>
-                            <span className="cart__summary-value">{discount.toFixed(2)}$</span>
+                            <span className="cart__summary-value">{discount.toFixed(2)}VNĐ</span>
                         </div>
                         <div className="cart__summary-row cart__summary-total">
                             <span>Cần thanh toán</span>
-                            <span className="cart__summary-value">{finalTotal.toFixed(2)}$</span>
+                            <span className="cart__summary-value">{finalTotal.toFixed(2)}VNĐ</span>
                         </div>
                         <Link to={{ pathname: '/payment', state: { cart: cart } }}>
                             <button className="cart__checkout-btn">Xác nhận đơn</button>

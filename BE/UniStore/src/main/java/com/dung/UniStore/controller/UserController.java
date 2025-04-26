@@ -1,6 +1,7 @@
 package com.dung.UniStore.controller;
 
 
+
 import com.dung.UniStore.dto.request.UserCreationRequest;
 import com.dung.UniStore.dto.response.ApiResponse;
 import com.dung.UniStore.dto.response.UserResponse;
@@ -29,9 +30,9 @@ public class UserController {
     private final AuthUtil authUtil;
 
     @GetMapping
-    public List<User> getAllUsers() {
+    public List<UserResponse> getAllUsers() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
-        List<User> users = userService.getAllUsers();
+        List<UserResponse> users = userService.getAllUsers();
         log.info("Username: {}", authentication.getName());
         authentication.getAuthorities().forEach(grantedAuthority -> log.info(grantedAuthority.getAuthority()));
         return users;
@@ -51,6 +52,15 @@ public class UserController {
 
     @PostMapping("/register")
     ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request) throws Exception {
+        String recaptchaToken = request.getRecaptcha();
+
+        boolean captchaVerified = userService.verifyCaptcha(recaptchaToken);
+        if (!captchaVerified) {
+            return ApiResponse.<UserResponse>builder()
+                    .code(HttpStatus.BAD_REQUEST.value())
+                    .message("Captcha không hợp lệ")
+                    .build();
+        }
         return ApiResponse.<UserResponse>builder()
                 .result(userService.createUser(request))
                 .build();
@@ -63,9 +73,15 @@ public class UserController {
                 .result(userService.updateUser(request, userId))
                 .build();
     }
+    @PutMapping("/updateByAdmin/{id}")
+    ApiResponse<UserResponse> updateUserByAdmin(@RequestBody @Valid UserCreationRequest request,@PathVariable int id) throws Exception {
 
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.updateUserByAdmin(request,id))
+                .build();
+    }
     @PutMapping("/changePW")
-    ApiResponse<UserResponse> updateUserPassword(@RequestBody @Valid UserCreationRequest request) throws Exception {
+    ApiResponse<UserResponse> updateUserPassword(@RequestBody @Valid UserCreationRequest request ) throws Exception {
         Long userId = authUtil.loggedInUserId();
         return ApiResponse.<UserResponse>builder()
                 .result(userService.updateUserPassword(request, userId))
@@ -86,9 +102,19 @@ public class UserController {
                 .build();
 
 }
+    @DeleteMapping("{id}")
+    ResponseEntity<UserResponse> deleteUser(@PathVariable int id) throws Exception {
+        userService.deleteUser(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
     private boolean isAdmin(Authentication authentication) {
         // Kiểm tra xem người dùng có role admin hay không
         return authentication.getAuthorities().stream()
                 .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+    }
+    @PutMapping("/id/{id}/{roleId}")
+    ResponseEntity<UserResponse> updateRoleforUser(@PathVariable int id,@PathVariable int roleId) throws Exception {
+        userService.updateRoleforUser(id,roleId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

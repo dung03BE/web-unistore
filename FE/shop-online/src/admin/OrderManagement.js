@@ -20,6 +20,20 @@ function OrderManagement() {
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [selectedOrderStatus, setSelectedOrderStatus] = useState(null); // Thêm state
     const debounceRef = useRef(null);
+
+    const statusOptions = [
+        { value: 'pending', label: 'Chờ xác nhận' },
+        { value: 'processing', label: 'Đang xử lý' },
+        { value: 'shipped', label: 'Đang giao' },
+        { value: 'delivered', label: 'Hoàn tất' },
+        { value: 'cancelled', label: 'Đã hủy' },
+    ];
+
+    const getStatusLabel = (status) => {
+        const option = statusOptions.find(opt => opt.value === status);
+        return option ? option.label : status;
+    };
+
     useEffect(() => {
         fetchOrders();
     }, [searchFullName, searchTotalMoney, searchActive]);
@@ -29,7 +43,11 @@ function OrderManagement() {
         setError(null);
         try {
             const result = await getOrderList(searchFullName, searchTotalMoney, searchActive);
-            setOrders(result);
+            const updatedOrders = result.map(order => ({
+                ...order,
+                statusDisplay: getStatusLabel(order.status), // Thêm trường hiển thị trạng thái
+            }));
+            setOrders(updatedOrders);
         } catch (err) {
             setError(err);
             console.error('Lỗi khi lấy danh sách đơn hàng:', err);
@@ -81,7 +99,7 @@ function OrderManagement() {
                 await putStatusOrder(selectedOrderId, newStatus);
                 setOrders((prevOrders) =>
                     prevOrders.map((order) =>
-                        order.id === selectedOrderId ? { ...order, status: newStatus } : order
+                        order.id === selectedOrderId ? { ...order, status: newStatus, statusDisplay: getStatusLabel(newStatus) } : order
                     )
                 );
                 message.success('Cập nhật trạng thái thành công');
@@ -99,7 +117,7 @@ function OrderManagement() {
         { title: 'Số Điện Thoại', dataIndex: 'phone_number', key: 'phone_number' },
         { title: 'Ngày Đặt', dataIndex: 'order_date', key: 'order_date', render: (date) => new Date(date).toLocaleString() },
         { title: 'Tổng Tiền', dataIndex: 'total_money', key: 'total_money' },
-        { title: 'Trạng Thái', dataIndex: 'status', key: 'status' },
+        { title: 'Trạng Thái', dataIndex: 'statusDisplay', key: 'status' }, // Hiển thị statusDisplay
     ];
 
     const detailColumns = [
@@ -163,11 +181,9 @@ function OrderManagement() {
                                 onChange={handleOrderStatusChange}
                                 style={{ width: '200px' }}
                             >
-                                <Option value="pending">pending</Option>
-                                <Option value="processing">processing</Option>
-                                <Option value="shipped">shipped</Option>
-                                <Option value="delivered">delivered</Option>
-                                <Option value="cancelled">cancelled</Option>
+                                {statusOptions.map(option => (
+                                    <Option key={option.value} value={option.value}>{option.label}</Option>
+                                ))}
                             </Select>
                         </p>
                         <p>Tên khách hàng: {selectedOrder.fullname}</p>
@@ -175,7 +191,7 @@ function OrderManagement() {
                         <p>Số điện thoại: {selectedOrder.phone_number}</p>
                         <p>Ngày đặt hàng: {new Date(selectedOrder.order_date).toLocaleString()}</p>
                         <p>Tổng tiền: {selectedOrder.total_money}</p>
-                        <p>Trạng thái: {selectedOrder.status}</p>
+                        <p>Trạng thái: {getStatusLabel(selectedOrder.status)}</p> {/* Hiển thị label */}
                         <p>Phương thức giao hàng: {selectedOrder.shipping_method}</p>
                         <p>Phương thức thanh toán: {selectedOrder.payment_method}</p>
                     </div>

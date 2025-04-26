@@ -12,6 +12,10 @@ export const addToCartAPI = async (productId, quantity, color) => {
     const path = `carts/products/${productId}/quantity/${quantity}?color=${color}`;
     try {
         const result = await postAuth(path, {}); // Body rỗng vì không có body request
+        if (result.status === 500) {
+
+            return "LoginValid";
+        }
         return result;
     } catch (error) {
         console.error("Lỗi khi thêm sản phẩm vào giỏ hàng:", error);

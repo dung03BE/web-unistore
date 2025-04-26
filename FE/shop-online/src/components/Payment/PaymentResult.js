@@ -65,12 +65,12 @@ function PaymentResult() {
                     <div className="order-info-column">
                         <p>Mã đơn hàng: <strong>{order.id}</strong></p>
                         <p>Tên người nhận: <strong>{order.fullname}</strong></p>
-                        <p>Số điện thoại: <strong>{order.phone_number}</strong></p>
+                        <p>Số điện thoại: <strong>{order.phoneNumber}</strong></p>
                         <p>Địa chỉ: <strong>{order.address}</strong></p>
                     </div>
                     <div className="order-info-column">
                         <p>Ngày đặt hàng: <strong>{new Date(order.order_date).toLocaleString()}</strong></p>
-                        <p>Trạng thái: <strong>{order.status}</strong></p>
+                        <p>Trạng thái: <strong>{"Đang xử lý"}</strong></p>
                         <p>Phương thức thanh toán: <strong>{order.payment_method}</strong></p>
                         <p>Phương thức giao hàng: <strong>{order.shipping_method}</strong></p>
                     </div>
@@ -119,7 +119,7 @@ function PaymentResult() {
                         </div>
                     </div>
                 )}
-                <div>Hãy truy cập mục <Link to="/orders">"Đơn hàng của tôi"</Link> để xem chi tiết đơn hàng!</div>
+                <div>Hãy truy cập mục <Link to="/profile">"Đơn hàng của tôi"</Link> để xem chi tiết đơn hàng!</div>
             </div>
         );
     };
