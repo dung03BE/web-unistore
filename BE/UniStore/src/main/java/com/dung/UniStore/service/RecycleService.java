@@ -104,12 +104,12 @@ public class RecycleService {
         User user = userRepository.findById(Math.toIntExact(userId)).orElse(null);
         if (user == null) return;
 
-        boolean hasCoupon = counponRepository.existsByUserAndCode(user, "DISCOUNT15");
+        boolean hasCoupon = counponRepository.existsByUserAndCode(user, "DISCOUNT10");
         if (!hasCoupon) {
             Counpons coupon = Counpons.builder()
-                    .code("DISCOUNT15")
+                    .code("DISCOUNT10")
                     .discountType(Counpons.DiscountType.percentage)
-                    .discountValue(new BigDecimal("0.15"))
+                    .discountValue(new BigDecimal("0.10"))
                     .startDate(LocalDateTime.now())
                     .endDate(LocalDateTime.now().plusMonths(1))
                     .status(Status.active)

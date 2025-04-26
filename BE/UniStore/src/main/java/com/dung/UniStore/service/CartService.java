@@ -33,7 +33,7 @@ public class CartService implements ICartService {
     private final ICartRepository cartRepository;
     private final IProductRepository productRepository;
     private final ICartItemRepository cartItemRepository;
-    private final InventoryRepository inventoryRepository;
+//    private final InventoryRepository inventoryRepository;
     private final ModelMapper modelMapper;
     private final AuthUtil authUtil;
     @PersistenceContext
@@ -48,30 +48,14 @@ public class CartService implements ICartService {
         // Tìm sản phẩm trong giỏ hàng theo productId và color
         CartItem cartItem = cartItemRepository.findCartItemByProductIdAndCartIdAndColor(cart.getCartId(), productId, color);
 
-        InventoryItem inventoryItem = inventoryRepository.findByProductId(Math.toIntExact(productId));
-
-        if (inventoryItem.getQuantity() == 0) {
-            throw new AppException(ErrorCode.OutofStock);
-        }
 
         if (cartItem != null) {
             // Nếu sản phẩm đã tồn tại trong giỏ, cộng dồn số lượng
             int updatedQuantity = cartItem.getQuantity() + quantity;
-
-            if (updatedQuantity > inventoryItem.getQuantity()) {
-                throw new Exception("Please, make an order of the " + product.getName()
-                        + " less than or equal to the quantity " + inventoryItem.getQuantity() + ".");
-            }
-
             cartItem.setQuantity(updatedQuantity);
             cartItemRepository.save(cartItem);
-        } else {
-            // Nếu sản phẩm chưa tồn tại, tạo mới CartItem
-            if (inventoryItem.getQuantity() < quantity) {
-                throw new Exception("Please, make an order of the " + product.getName()
-                        + " less than or equal to the quantity " + inventoryItem.getQuantity() + ".");
-            }
 
+        } else {
             CartItem newCartItem = new CartItem();
             newCartItem.setProduct(product);
             newCartItem.setCart(cart);
@@ -82,14 +66,22 @@ public class CartService implements ICartService {
             newCartItem.setProductPrice(productPrice);
 
             cartItemRepository.save(newCartItem);
-        }
 
-        // Cập nhật lại tổng giá giỏ hàng
-        double totalPrice = cart.getCartItems().stream()
-                .mapToDouble(item -> item.getProductPrice() * item.getQuantity())
-                .sum();
+        }
+        // QUAN TRỌNG: Tính toán totalPrice từ danh sách cartItems mới nhất
+        List<CartItem> updatedCartItems = cartItemRepository.findByCart_CartId(cart.getCartId());
+
+        // Tính toán tổng giá trực tiếp từ danh sách cart items đã cập nhật
+        double totalPrice = 0.0;
+        for (CartItem item : updatedCartItems) {
+            totalPrice += item.getProductPrice() * item.getQuantity();
+        }
+        // Cập nhật totalPrice và lưu cart
         cart.setTotalPrice(totalPrice);
         cartRepository.save(cart);
+
+        // Đảm bảo cart có danh sách cartItems mới nhất
+        cart.setCartItems(updatedCartItems);
 
         // Chuyển đổi giỏ hàng sang DTO
         CartResponse cartDTO = modelMapper.map(cart, CartResponse.class);
@@ -277,11 +269,11 @@ public class CartService implements ICartService {
         Product product = productRepository.findById(Math.toIntExact(productId))
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED));
 
-        // Kiểm tra tồn kho sản phẩm
-        InventoryItem inventory = inventoryRepository.findByProductId(Math.toIntExact(productId));
-        if (inventory == null || inventory.getQuantity() == 0) {
-            throw new AppException(ErrorCode.OutofStock);
-        }
+//        // Kiểm tra tồn kho sản phẩm
+//        InventoryItem inventory = inventoryRepository.findByProductId(Math.toIntExact(productId));
+//        if (inventory == null || inventory.getQuantity() == 0) {
+//            throw new AppException(ErrorCode.OutofStock);
+//        }
 
         // Kiểm tra số lượng sản phẩm có đủ không
 //        if (inventory.getQuantity() < quantityChange) {

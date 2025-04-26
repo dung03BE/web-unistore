@@ -3,6 +3,7 @@ package com.dung.UniStore.service;
 import com.dung.UniStore.dto.request.OrderDetailCreationRequest;
 import com.dung.UniStore.dto.response.OrderDetailsResponse;
 import com.dung.UniStore.entity.*;
+import com.dung.UniStore.exception.ApiException;
 import com.dung.UniStore.exception.AppException;
 import com.dung.UniStore.exception.ErrorCode;
 import com.dung.UniStore.mapper.OrderDetailMapper;
@@ -28,21 +29,44 @@ public class OrderDetailService implements IOrderDetailService{
     private final IProductRepository productRepository;
     private final OrderDetailMapper orderDetailMapper;
     private final RedisTemplate<String,Object> redisTemplate;
-    private final InventoryRepository inventoryRepository;
+//    private final InventoryRepository inventoryRepository;
     private final ICartItemRepository cartItemRepository;
+    private final IInventoryRepository iinventoryRepository;
+    private final IProductColorRepo productColorRepo;
     @Autowired
     private RedissonClient redissonClient;
 
     @Override
-    public BigDecimal createOrderDetails(int orderId, Long cartId) {
+    public BigDecimal createOrderDetails(int orderId, Long cartId) throws ApiException {
         List<CartItem> cartItems = cartItemRepository.findByCartCartId(cartId);
         if (cartItems.isEmpty()) {
-            throw new RuntimeException("Giỏ hàng trống!");
+            throw new ApiException("Giỏ hàng trống!");
         }
         BigDecimal totalAmount = BigDecimal.ZERO;
         Optional<Order> order = orderRepository.findById(orderId);
         for(CartItem cartItem: cartItems)
         {
+            // Trừ số lượng trong kho
+            // Lấy ProductColor từ productId và color (String)
+            ProductColor productColor = (ProductColor) productColorRepo
+                    .findByProductIdAndColor(cartItem.getProduct().getId(), cartItem.getColor())
+                    .orElseThrow(() -> new ApiException("Không tìm thấy màu sản phẩm phù hợp"));
+
+            // Lấy inventory theo product + color
+            Inventory inventory = (Inventory) iinventoryRepository
+                    .findByProductIdAndProductColorId(cartItem.getProduct().getId(), productColor.getId())
+                    .orElseThrow(() -> new ApiException("Kho sản phẩm không tồn tại"));
+
+            // Kiểm tra số lượng tồn kho
+            if (inventory.getQuantity() < cartItem.getQuantity()) {
+                throw new ApiException("Sản phẩm \"" + cartItem.getProduct().getName() +
+                        "\" (màu: " + productColor.getColor() + ") không đủ số lượng trong kho.");
+            }
+
+            // Trừ kho
+            inventory.setQuantity(inventory.getQuantity() - cartItem.getQuantity());
+            iinventoryRepository.save(inventory);
+
             OrderDetail orderDetail = new OrderDetail();
             orderDetail.setOrder(order.get());
             orderDetail.setProduct(cartItem.getProduct());

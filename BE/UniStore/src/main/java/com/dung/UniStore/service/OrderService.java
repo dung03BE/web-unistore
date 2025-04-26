@@ -12,21 +12,18 @@ import com.dung.UniStore.mapper.OrderMapper;
 import com.dung.UniStore.repository.*;
 import com.dung.UniStore.specification.OrderSpecification;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -81,6 +78,7 @@ public class OrderService implements IOrderService {
 
         // Gửi email xác nhận
         emailService.sendOrderConfirmationEmail(message);
+
         return orderResponse;
     }
 
@@ -111,15 +109,15 @@ public class OrderService implements IOrderService {
         return orderMapper.toOrderResponse(order);
     }
 
-
+    @Transactional(rollbackFor = {Exception.class})
     @Override
     public String checkoutVnpay(OrderCreationRequest request, Long userId, HttpServletRequest httpRequest) throws Exception {
         Counpons coupon = null;
         User existingUser = userRepository.findById(Math.toIntExact(userId)).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_EXISTED)
         );
-        Cart cart = (Cart) cartRepository.findByUserId(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("Giỏ hàng trống!"));
+        Cart cart = (Cart) cartRepository.findByUserId(Math.toIntExact(userId))
+                .orElseThrow(() -> new ApiException("Giỏ hàng trống!"));
 
         // Kiểm tra mã coupon
         BigDecimal discountAmount = BigDecimal.ZERO;
@@ -225,6 +223,8 @@ public class OrderService implements IOrderService {
     }
 
 
+
+    @Transactional(rollbackFor = {Exception.class})
     @Override
     public OrderResponse checkout(OrderCreationRequest request) throws Exception {
         Counpons coupon = null;
@@ -234,7 +234,7 @@ public class OrderService implements IOrderService {
 
         // Kiểm tra giỏ hàng
         Cart cart = (Cart) cartRepository.findByUserId(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("Giỏ hàng trống!"));
+                .orElseThrow(() -> new ApiException("Giỏ hàng trống!"));
 
         // Kiểm tra mã coupon
         BigDecimal discountAmount = BigDecimal.ZERO;
@@ -358,17 +358,30 @@ public class OrderService implements IOrderService {
 
 
     public void deleteCartAndItems(Long cartId) {
+//        Cart cart = cartRepository.findById(cartId)
+//                .orElseThrow(() -> new RuntimeException("Cart not found!"));
+//
+//        // Xóa toàn bộ CartItem trước
+//        cartItemRepository.deleteAll(cart.getCartItems());
+//
+//        // Đảm bảo dữ liệu được cập nhật ngay lập tức
+//        cartItemRepository.flush();
+//
+//        // Sau đó mới xóa Cart
+//        cartRepository.deleteByCartId(cartId);
+//        cartRepository.flush();
         Cart cart = cartRepository.findById(cartId)
                 .orElseThrow(() -> new RuntimeException("Cart not found!"));
 
-        // Xóa toàn bộ CartItem trước
-        cartItemRepository.deleteAll(cart.getCartItems());
+        // 1. Xóa từng cartItem khỏi cart + xóa liên kết ngược
+        for (CartItem item : new ArrayList<>(cart.getCartItems())) {
+            item.setCart(null); // Bắt buộc để tránh vòng lặp và detached entity
+        }
 
-        // Đảm bảo dữ liệu được cập nhật ngay lập tức
-        cartItemRepository.flush();
+        // 2. Xóa tất cả cartItems bằng clear() → orphanRemoval sẽ xóa khỏi DB
+        cart.getCartItems().clear();
 
-        // Sau đó mới xóa Cart
-        cartRepository.deleteByCartId(cartId);
-        cartRepository.flush();
+        // 3. Xóa cart luôn
+        cartRepository.delete(cart);
     }
 }

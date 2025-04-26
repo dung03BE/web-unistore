@@ -15,8 +15,8 @@ public class CartItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long cartItemId;
-    @ManyToOne(cascade = CascadeType.REMOVE)
-    @JoinColumn(name="cart_id")
+    @ManyToOne
+    @JoinColumn(name = "cart_id", nullable = false)
     private Cart cart;
     @ManyToOne
     @JoinColumn(name="product_id")

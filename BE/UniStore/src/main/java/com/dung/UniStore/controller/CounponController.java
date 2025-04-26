@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("api/v1/coupon")
 @RequiredArgsConstructor
@@ -34,6 +36,7 @@ public class CounponController {
                 requestDTO.getDiscountValue(),
                 requestDTO.getStartDate(),
                 requestDTO.getEndDate(),
+                requestDTO.getStatus(),
                 requestDTO.getUserLimit(),
                 requestDTO.getUsageLimit(),
                 requestDTO.getUserId()
@@ -46,5 +49,18 @@ public class CounponController {
         Long userId = authUtil.loggedInUserId();
         CounponResponse coupon = counponService.getCouponByCodeAndUser(code,userId);
         return ResponseEntity.ok(coupon);
+    }
+
+    @GetMapping()
+    public ResponseEntity<List<CounponResponse>> getCoupons() throws ApiException {
+
+        List<CounponResponse> coupons = counponService.getCoupons();
+        return ResponseEntity.ok(coupons);
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<CounponResponse> deleteCoupon(@PathVariable Long id) throws ApiException {
+
+        CounponResponse counponResponse = counponService.deleteCoupon(id);
+        return ResponseEntity.ok(counponResponse);
     }
 }

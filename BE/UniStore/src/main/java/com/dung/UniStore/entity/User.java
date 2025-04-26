@@ -26,7 +26,7 @@ public class User extends BaseEntity {
     int id;
     @Column(name = "fullname", length = 100)
     String fullName;
-    @Column(name = "phone_number", length = 50,unique = true,columnDefinition = "VARCHAR(255 COLLATE utf8mb4_unicode_ci")
+    @Column(name = "phone_number", length = 50,unique = true,columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")
     String phoneNumber;
     @Column(name = "address", length = 100)
     String address;
@@ -43,7 +43,7 @@ public class User extends BaseEntity {
     @Column(name = "google_account_id")
     int googleAccountId;
     @ManyToOne
-    @JoinColumn(name = "`role_id`")
+    @JoinColumn(name = "`role_id`",referencedColumnName = "id")
     Role role;
 //    Set<String> roles;
     @ToString.Exclude

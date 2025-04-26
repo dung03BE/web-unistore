@@ -75,13 +75,23 @@ public class OrderController {
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @PostMapping("/checkoutVnpay")
-    public ResponseEntity<?> checkoutVnpay(@RequestBody OrderCreationRequest request, HttpServletRequest httpRequest) {
+    public ApiResponse<Map<String, String>> checkoutVnpay(@RequestBody OrderCreationRequest request, HttpServletRequest httpRequest) {
         try {
             Long userId = authUtil.loggedInUserId();
             String paymentUrl = orderService.checkoutVnpay(request, userId, httpRequest);
-            return ResponseEntity.ok(Map.of("paymentUrl", paymentUrl));
+
+            return ApiResponse.<Map<String, String>>builder()
+                    .result(Map.of("paymentUrl", paymentUrl))
+                    .message("Khởi tạo thanh toán thành công")
+                    .code(1000)
+                    .build();
+
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ApiResponse.<Map<String, String>>builder()
+                    .result(null)
+                    .message(e.getMessage() != null ? e.getMessage() : "Đã xảy ra lỗi")
+                    .code(400) // hoặc code riêng biệt bạn quy định như 1016, 1017...
+                    .build();
         }
     }
     @PostMapping("/checkout")

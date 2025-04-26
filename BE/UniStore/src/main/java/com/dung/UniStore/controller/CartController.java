@@ -14,6 +14,7 @@ import com.dung.UniStore.utils.AuthUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,6 +27,7 @@ public class CartController {
     private final AuthUtil authUtil;
     private final ICartRepository cartRepository;
 
+    @PostAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER','ROLE_EMPLOYEE')")
     @PostMapping("/products/{productId}/quantity/{quantity}")
     public ResponseEntity<CartResponse> addProToCart(
             @PathVariable Long productId,

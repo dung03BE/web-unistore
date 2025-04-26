@@ -16,7 +16,10 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +48,7 @@ public class CounponService {
                                BigDecimal discountValue,
                                LocalDateTime startDate,
                                LocalDateTime endDate,
+                               String status,
                                int userLimit,
                                int usageLimit,
                                Long userId) {
@@ -103,4 +107,22 @@ public class CounponService {
     }
 
 
+    public List<CounponResponse> getCoupons() {
+        List<Counpons> coupons = counponRepository.findAll();
+
+        return coupons.stream()
+                .sorted(Comparator.comparing(Counpons::getStartDate).reversed()) // Sắp xếp theo startDate mới nhất
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    public CounponResponse deleteCoupon(Long id) throws ApiException {
+        Counpons coupon = counponRepository.findById(Math.toIntExact(id))
+                .orElseThrow(() -> new ApiException("Coupon không tồn tại"));
+        CounponResponse response = mapToResponse(coupon);
+
+        counponRepository.delete(coupon);
+
+        return response;
+    }
 }

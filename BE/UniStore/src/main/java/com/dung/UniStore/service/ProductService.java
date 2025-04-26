@@ -41,7 +41,7 @@ public class ProductService implements IProductService {
     final ProductMapper productMapper;
     final ICategoryRepository categoryRepository;
     final IProductImageRepository productImageRepository;
-    final InventoryRepository inventoryRepository;
+//    final InventoryRepository inventoryRepository;
     final IProductColorRepo productColorRepo;
     @Override
     public Page<ProductResponse> getAllProducts(Pageable pageable, ProductFilterForm form) {
@@ -82,9 +82,9 @@ public class ProductService implements IProductService {
         ProductDetailsResponse productDetailsResponse = productMapper.toProductDetailsResponse(productDetails);
         productResponse.setDetails(productDetailsResponse);
         // Lấy `quantity` từ InventoryItem và gán vào ProductResponse
-        InventoryItem inventoryItem = inventoryRepository.findByProductId(id);
-        int quantity = (inventoryItem != null) ? inventoryItem.getQuantity() : 0;
-        productResponse.setQuantity(quantity);
+//        InventoryItem inventoryItem = inventoryRepository.findByProductId(id);
+//        int quantity = (inventoryItem != null) ? inventoryItem.getQuantity() : 0;
+//        productResponse.setQuantity(quantity);
 
         return productResponse;
     }
@@ -313,10 +313,10 @@ public class ProductService implements IProductService {
             ProductDetailsResponse productDetailsResponse = productMapper.toProductDetailsResponse(productDetails);
             productResponse.setDetails(productDetailsResponse);
 
-            // Lấy số lượng tồn kho
-            InventoryItem inventoryItem = inventoryRepository.findByProductId(product.getId());
-            int quantity = (inventoryItem != null) ? inventoryItem.getQuantity() : 0;
-            productResponse.setQuantity(quantity);
+//            // Lấy số lượng tồn kho
+//            InventoryItem inventoryItem = inventoryRepository.findByProductId(product.getId());
+//            int quantity = (inventoryItem != null) ? inventoryItem.getQuantity() : 0;
+//            productResponse.setQuantity(quantity);
 
             return productResponse;
         }).collect(Collectors.toList());

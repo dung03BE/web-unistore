@@ -24,7 +24,7 @@ public interface ICounponRepository extends JpaRepository<Counpons,Integer> {
     ORDER BY c.user.id DESC
     """)
     List<Counpons> findByCodeForUser(@Param("code") String code, @Param("userId") Long userId);
-    @Query(value = "SELECT * FROM counpons c " +
+    @Query(value = "SELECT * FROM coupons c " +
             "WHERE c.code = :code " +
             "AND c.status = :status " +
             "AND c.start_date <= :now " +

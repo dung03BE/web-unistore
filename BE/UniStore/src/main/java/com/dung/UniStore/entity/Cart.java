@@ -22,7 +22,7 @@ public class Cart {
     @OneToOne
     @JoinColumn(name="user_id")
     private User user;
-    @OneToMany(mappedBy = "cart",cascade = CascadeType.ALL,orphanRemoval = true,fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "cart",cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.EAGER)
     @ToString.Exclude
     private List<CartItem> cartItems= new ArrayList<>();
 

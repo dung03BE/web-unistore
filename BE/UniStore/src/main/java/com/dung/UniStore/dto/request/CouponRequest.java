@@ -14,7 +14,7 @@ public class CouponRequest {
 
     private LocalDateTime startDate;
     private LocalDateTime endDate;
-
+    private String status;
     private int userLimit;   // Mỗi user dùng tối đa bao nhiêu lần
     private int usageLimit;  // Tổng lượt dùng toàn hệ thống
 
