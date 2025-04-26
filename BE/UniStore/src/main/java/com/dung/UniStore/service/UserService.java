@@ -211,7 +211,7 @@ public class UserService {
     }
 
     public boolean verifyCaptcha(String token) {
-        String secret = "6LfsghIrAAAAAKJ24wOyXEyS2hkLknLzCuSn_x0N";
+
         String url = "https://www.google.com/recaptcha/api/siteverify";
 
 
